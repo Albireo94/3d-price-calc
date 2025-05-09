@@ -1,61 +1,72 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, render_template, jsonify
 import os
-from stl import mesh
-import cadquery as cq
-import tempfile
+import trimesh
+
+# ✅ NEW: Import FreeCAD only when needed
+
+
+def calculate_step_volume(filepath):
+    try:
+        import FreeCAD
+        import Part
+        shape = Part.Shape()
+        shape.read(filepath)
+        volume = shape.Volume / 1000  # Convert mm³ to cm³
+        return volume
+    except Exception as e:
+        raise Exception(f"FreeCAD failed: {str(e)}")
+
 
 app = Flask(__name__)
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'stl', 'step', 'stp'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# --- STL Volume Calculation ---
-
-
-def calculate_stl_volume(file_path):
-    model = mesh.Mesh.from_file(file_path)
-    volume_mm3 = model.get_mass_properties()[0]
-    return volume_mm3 / 1000  # convert mm³ to cm³
-
-# --- STEP Volume Calculation ---
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 
-def calculate_step_volume(file_path):
-    solid = cq.importers.importStep(file_path)
-    volume_mm3 = solid.val().Volume()
-    return volume_mm3 / 1000  # convert mm³ to cm³
-
-# --- Price Calculation ---
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def calculate_price(volume_cm3, rate=0.15, setup_fee=2.0):
-    return round(volume_cm3 * rate + setup_fee, 2)
-
-# --- File Upload Endpoint ---
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
     file = request.files['file']
-    ext = os.path.splitext(file.filename)[-1].lower()
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
-        file.save(tmp.name)
-        tmp_path = tmp.name
+    if file and allowed_file(file.filename):
+        filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filename)
 
-    try:
-        if ext == '.stl':
-            volume = calculate_stl_volume(tmp_path)
-        elif ext in ['.step', '.stp']:
-            volume = calculate_step_volume(tmp_path)
-        else:
-            return jsonify({'error': 'Unsupported file type'}), 400
+        try:
+            ext = file.filename.rsplit('.', 1)[1].lower()
 
-        price = calculate_price(volume)
-        return jsonify({
-            'volume_cm3': round(volume, 2),
-            'price_eur': price
-        })
+            # ✅ Use FreeCAD for STEP/STP, Trimesh for STL
+            if ext in ['step', 'stp']:
+                volume = calculate_step_volume(filename)
+            elif ext == 'stl':
+                mesh = trimesh.load_mesh(filename)
+                volume = mesh.volume
+            else:
+                return jsonify({"error": "Unsupported file type"}), 400
 
-    finally:
-        os.remove(tmp_path)
+            price = volume * 0.10  # Simple pricing logic
+            return jsonify({"volume": volume, "price": price})
+
+        except Exception as e:
+            return jsonify({"error": f"Error processing the 3D model: {str(e)}"}), 500
+
+    return jsonify({"error": "Invalid file type"}), 400
 
 
 if __name__ == '__main__':
