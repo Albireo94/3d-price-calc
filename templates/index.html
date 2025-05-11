@@ -55,38 +55,42 @@
 </div>
 
 <script>
-document.getElementById('uploadForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    
-    try {
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData
-        });
+    async function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const resultDiv = document.getElementById('result');
 
-        const text = await response.text();  // First get raw text
-        let data;
+        // Clear previous results
+        resultDiv.innerHTML = '';
+
+        if (!fileInput.files.length) {
+            resultDiv.innerHTML = '<p class="error">Please select a file to upload.</p>';
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
 
         try {
-            data = JSON.parse(text);  // Try parsing JSON
-        } catch (jsonErr) {
-            throw new Error("Server returned invalid JSON: " + text);
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Display volume and price
+                resultDiv.innerHTML = `<p>Volume: ${data.volume.toFixed(2)} cubic cm</p>
+                                       <p>Price: $${data.price.toFixed(2)}</p>`;
+            } else {
+                // Display error message
+                resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
         }
-
-        if (!response.ok) {
-            throw new Error(data.error || "Unknown error");
-        }
-
-        // Success!
-        alert(`Volume: ${data.volume.toFixed(2)} cm³\nPrice: $${data.price.toFixed(2)}`);
-
-    } catch (err) {
-        console.error(err);
-        alert("Upload failed: " + err.message);
     }
-});
 </script>
 
 </body>
