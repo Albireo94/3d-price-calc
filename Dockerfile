@@ -1,30 +1,25 @@
-# Use the official Python image from Docker Hub
-FROM python:3.8-slim
+FROM python:3.10-slim
 
-# Set the working directory inside the container
-WORKDIR /app
-
-# Install dependencies for trimesh and Flask app
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    libgl1-mesa-glx \
+    git cmake g++ make libx11-dev libgl1-mesa-glx libglu1-mesa freeglut3 \
+    libgl1-mesa-dev libglu1-mesa-dev libfreetype6-dev libxext-dev libxi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements.txt into the container
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install Python dependencies
+WORKDIR /app
 COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Install the Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy app files
+COPY . .
 
-# Copy the application code into the container
-COPY . /app
-
-# Set environment variable for Flask
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=production
-
-# Expose the Flask app port
+# Expose the Flask port
 EXPOSE 5000
 
-# Command to run the application
-CMD ["python", "app.py"]
+# Run the app
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
