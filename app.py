@@ -80,7 +80,16 @@ def upload_file():
                 volume = calculate_step_volume(filename)
             elif ext == 'stl':
                 mesh = trimesh.load_mesh(filename)
+
+                # ✅ Validate mesh before processing
+                if mesh.is_empty:
+                    raise ValueError("Uploaded STL is empty or invalid.")
+                if not mesh.is_volume:
+                    raise ValueError(
+                        "Uploaded mesh is not a closed volume (solid).")
+
                 volume = mesh.volume / 1000  # Convert mm³ to cm³
+
             else:
                 return jsonify({"error": "Unsupported file type"}), 400
 
