@@ -1,25 +1,19 @@
-FROM python:3.10-slim
+FROM continuumio/miniconda3
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git cmake g++ make libx11-dev libgl1-mesa-glx libglu1-mesa-dev freeglut3-dev \
-    libgl1-mesa-dev libfreetype6-dev libxext-dev libxi-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install Python dependencies
+# Set working directory
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy app files
+# Copy environment file first for caching
+COPY environment.yml .
+
+# Create environment and activate it
+RUN conda env create -f environment.yml && conda clean --all --yes
+
+# Make RUN commands use the new environment
+SHELL ["conda", "run", "-n", "occenv", "/bin/bash", "-c"]
+
+# Copy rest of the app
 COPY . .
 
-# Expose the Flask port
-EXPOSE 5000
-
-# Run the app
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+# Command to run the app
+CMD ["conda", "run", "-n", "occenv", "gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
