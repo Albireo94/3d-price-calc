@@ -2,8 +2,8 @@ FROM python:3.10-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git cmake g++ make libx11-dev libgl1-mesa-glx libglu1-mesa freeglut3 \
-    libgl1-mesa-dev libglu1-mesa-dev libfreetype6-dev libxext-dev libxi-dev \
+    git cmake g++ make libx11-dev libgl1-mesa-glx libglu1-mesa-dev freeglut3-dev \
+    libgl1-mesa-dev libfreetype6-dev libxext-dev libxi-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables
