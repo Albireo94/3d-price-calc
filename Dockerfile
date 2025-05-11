@@ -1,17 +1,30 @@
-# Use CadQuery's base image
-FROM cadquery/cadquery:latest
+# Use the official Python image from Docker Hub
+FROM python:3.8-slim
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy your app code into the container
-COPY . .
+# Install dependencies for trimesh and Flask app
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Flask and other dependencies
-RUN pip install -r requirements.txt
+# Copy the requirements.txt into the container
+COPY requirements.txt .
 
-# Expose port 10000 for Flask or gunicorn
-EXPOSE 10000
+# Install the Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Run the app using gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
+# Copy the application code into the container
+COPY . /app
+
+# Set environment variable for Flask
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+
+# Expose the Flask app port
+EXPOSE 5000
+
+# Command to run the application
+CMD ["python", "app.py"]

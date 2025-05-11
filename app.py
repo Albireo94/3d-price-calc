@@ -1,26 +1,26 @@
 from flask import Flask, request, render_template, jsonify
 import os
 import trimesh
-from cadquery import importers
 
 
 def calculate_step_volume(filepath):
     try:
-        assembly = importers.importStep(filepath)
-        solids = assembly.solids()
-        if not solids:
-            raise Exception("No solids found in STEP file.")
-        volume = sum(s.Volume() for s in solids) / 1000  # Convert mm³ to cm³
+        # Use trimesh to load the STEP file (it handles both STL and STEP files)
+        mesh = trimesh.load_mesh(filepath)
+        if mesh.is_empty:
+            raise Exception("No valid geometry found in STEP file.")
+        # Return volume in cm³ (trimesh gives the volume in mm³ by default)
+        volume = mesh.volume / 1000  # Convert mm³ to cm³
         return volume
     except Exception as e:
-        raise Exception(f"CadQuery failed: {str(e)}")
+        raise Exception(f"Error with file: {str(e)}")
 
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'stl', 'step', 'stp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-par
+
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
@@ -37,7 +37,7 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return jsonify({"error": "No file t"}), 400
+        return jsonify({"error": "No file part"}), 400
 
     file = request.files['file']
     if file.filename == '':
@@ -54,7 +54,7 @@ def upload_file():
                 volume = calculate_step_volume(filename)
             elif ext == 'stl':
                 mesh = trimesh.load_mesh(filename)
-                volume = mesh.volume
+                volume = mesh.volume / 1000  # Convert mm³ to cm³
             else:
                 return jsonify({"error": "Unsupported file type"}), 400
 
