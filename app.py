@@ -1,27 +1,26 @@
 from flask import Flask, request, render_template, jsonify
 import os
 import trimesh
-
-# ✅ NEW: Import FreeCAD only when needed
+from cadquery import importers
 
 
 def calculate_step_volume(filepath):
     try:
-        import FreeCAD
-        import Part
-        shape = Part.Shape()
-        shape.read(filepath)
-        volume = shape.Volume / 1000  # Convert mm³ to cm³
+        assembly = importers.importStep(filepath)
+        solids = assembly.solids()
+        if not solids:
+            raise Exception("No solids found in STEP file.")
+        volume = sum(s.Volume() for s in solids) / 1000  # Convert mm³ to cm³
         return volume
     except Exception as e:
-        raise Exception(f"FreeCAD failed: {str(e)}")
+        raise Exception(f"CadQuery failed: {str(e)}")
 
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'stl', 'step', 'stp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
+par
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
@@ -38,7 +37,7 @@ def index():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+        return jsonify({"error": "No file t"}), 400
 
     file = request.files['file']
     if file.filename == '':
@@ -51,7 +50,6 @@ def upload_file():
         try:
             ext = file.filename.rsplit('.', 1)[1].lower()
 
-            # ✅ Use FreeCAD for STEP/STP, Trimesh for STL
             if ext in ['step', 'stp']:
                 volume = calculate_step_volume(filename)
             elif ext == 'stl':
