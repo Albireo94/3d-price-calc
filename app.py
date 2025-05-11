@@ -3,17 +3,43 @@ import os
 import trimesh
 
 
+from OCC.Core.STEPControl import STEPControl_Reader
+from OCC.Core.IFSelect import IFSelect_RetDone
+from OCC.Core.BRepGProp import brepgprop_VolumeProperties
+from OCC.Core.GProp import GProp_GProps
+from OCC.Core.TopAbs import TopAbs_SOLID
+from OCC.Core.TopExp import TopExp_Explorer
+from OCC.Core.TopoDS import topods_Solid
+
+
 def calculate_step_volume(filepath):
     try:
-        # Use trimesh to load the STEP file (it handles both STL and STEP files)
-        mesh = trimesh.load_mesh(filepath)
-        if mesh.is_empty:
-            raise Exception("No valid geometry found in STEP file.")
-        # Return volume in cm³ (trimesh gives the volume in mm³ by default)
-        volume = mesh.volume / 1000  # Convert mm³ to cm³
-        return volume
+        # Load the STEP file
+        step_reader = STEPControl_Reader()
+        status = step_reader.ReadFile(filepath)
+
+        if status != IFSelect_RetDone:
+            raise Exception("Failed to read STEP file.")
+
+        # Transfer all roots to shape
+        step_reader.TransferRoots()
+        shape = step_reader.OneShape()
+
+        # Calculate volume for all solids
+        exp = TopExp_Explorer(shape, TopAbs_SOLID)
+        total_volume = 0.0
+
+        while exp.More():
+            solid = topods_Solid(exp.Current())
+            props = GProp_GProps()
+            brepgprop_VolumeProperties(solid, props)
+            total_volume += props.Mass()
+            exp.Next()
+
+        return total_volume / 1000  # Convert mm³ to cm³
+
     except Exception as e:
-        raise Exception(f"Error with file: {str(e)}")
+        raise Exception(f"Error reading STEP file: {str(e)}")
 
 
 app = Flask(__name__)
