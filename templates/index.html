@@ -43,6 +43,28 @@
         .error {
             color: red;
         }
+    /* Add spinner styles here */
+    #spinner {
+        display: none;
+        margin-top: 20px;
+    }
+
+    .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #4CAF50;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
     </style>
 </head>
 <body>
@@ -52,17 +74,22 @@
     <input type="file" id="fileInput" accept=".stl,.step,.stp">
     <button onclick="uploadFile()">Upload</button>
     <div id="result" class="result"></div>
+    <div id="spinner"><div class="loader"></div></div>
+
 </div>
 
 <script>
     async function uploadFile() {
         const fileInput = document.getElementById('fileInput');
         const resultDiv = document.getElementById('result');
+        const spinner = document.getElementById('spinner'); // Get spinner element
 
         // Clear previous results
         resultDiv.innerHTML = '';
+        spinner.style.display = 'block'; // ✅ Show spinner
 
         if (!fileInput.files.length) {
+            spinner.style.display = 'none'; // ❌ Hide spinner on early error
             resultDiv.innerHTML = '<p class="error">Please select a file to upload.</p>';
             return;
         }
@@ -78,20 +105,19 @@
             });
 
             const data = await response.json();
+            spinner.style.display = 'none'; // ✅ Hide spinner after response
 
             if (response.ok) {
-                // Display volume and price
                 resultDiv.innerHTML = `<p>Volume: ${data.volume.toFixed(2)} cubic cm</p>
                                        <p>Price: $${data.price.toFixed(2)}</p>`;
             } else {
-                // Display error message
                 resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
             }
         } catch (error) {
+            spinner.style.display = 'none'; // ❌ Hide spinner on fetch error
             resultDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
         }
     }
 </script>
-
 </body>
 </html>
