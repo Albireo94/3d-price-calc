@@ -43,109 +43,53 @@
         .error {
             color: red;
         }
-        #spinner {
-            display: none;
-            margin-top: 20px;
-        }
-        .loader {
-            border: 6px solid #f3f3f3;
-            border-top: 6px solid #4CAF50;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .options {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        .options label {
-            margin-right: 10px;
-        }
-        .options select {
-            margin: 5px 10px 10px 0;
-            padding: 5px;
-        }
-        .options input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
+    /* Add spinner styles here */
+    #spinner {
+        display: none;
+        margin-top: 20px;
+    }
+
+    .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #4CAF50;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Upload 3D Model</h2>
-
-    <div class="options">
-        <label for="selectA">A:</label>
-        <select id="selectA">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
-
-        <label for="selectB">B:</label>
-        <select id="selectB">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
-
-        <label for="selectC">C:</label>
-        <select id="selectC">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
-
-        <label for="selectD">D:</label>
-        <select id="selectD">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-        </select>
-
-        <br><br>
-
-        <label for="customText">Custom Text:</label><br>
-        <input type="text" id="customText" placeholder="Enter your text here">
-    </div>
-
     <input type="file" id="fileInput" accept=".stl,.step,.stp">
     <button onclick="uploadFile()">Upload</button>
-
     <div id="result" class="result"></div>
     <div id="spinner"><div class="loader"></div></div>
+
 </div>
 
 <script>
     async function uploadFile() {
         const fileInput = document.getElementById('fileInput');
         const resultDiv = document.getElementById('result');
-        const spinner = document.getElementById('spinner');
+        const spinner = document.getElementById('spinner'); // Get spinner element
 
         // Clear previous results
         resultDiv.innerHTML = '';
-        spinner.style.display = 'block';  // Show spinner
+        spinner.style.display = 'block'; // ✅ Show spinner
 
         if (!fileInput.files.length) {
-            spinner.style.display = 'none'; // Hide spinner on error
+            spinner.style.display = 'none'; // ❌ Hide spinner on early error
             resultDiv.innerHTML = '<p class="error">Please select a file to upload.</p>';
             return;
         }
@@ -154,12 +98,26 @@
         const formData = new FormData();
         formData.append('file', file);
 
-        // Optional: Collect dropdown and text values
-        const valueA = document.getElementById('selectA').value;
-        const valueB = document.getElementById('selectB').value;
-        const valueC = document.getElementById('selectC').value;
-        const valueD = document.getElementById('selectD').value;
-        const customText = document.getElementById('customText').value;
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
 
-        // You can append these to the formData if sending them to the backend
-        formData.appe
+            const data = await response.json();
+            spinner.style.display = 'none'; // ✅ Hide spinner after response
+
+            if (response.ok) {
+                resultDiv.innerHTML = `<p>Volume: ${data.volume.toFixed(2)} cubic cm</p>
+                                       <p>Price: $${data.price.toFixed(2)}</p>`;
+            } else {
+                resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+            }
+        } catch (error) {
+            spinner.style.display = 'none'; // ❌ Hide spinner on fetch error
+            resultDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
+        }
+    }
+</script>
+</body>
+</html>
