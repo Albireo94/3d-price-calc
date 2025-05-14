@@ -7,7 +7,7 @@ WORKDIR /app
 COPY environment.yml .
 
 # Create environment and activate it
-RUN conda env create -f environment.yml && conda clean --all --yes
+RUN conda env update --file environment.yml --name base && conda clean --all --yes
 
 # Make RUN commands use the new environment
 SHELL ["conda", "run", "-n", "occenv", "/bin/bash", "-c"]
