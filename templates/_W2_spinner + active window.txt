@@ -27,18 +27,15 @@
             margin: 20px 0;
         }
         button {
- 	   padding: 10px 20px;
- 	   background-color: #FFD700; /* Yellow */
-  	   color: black;
-  	   border: none;
-  	   cursor: pointer;
-  	   border-radius: 5px;
-  	   font-weight: bold;
-  	   transition: background-color 0.3s, color 0.3s;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
         }
         button:hover {
-  	   background-color: black;
-  	   color: white;
+            background-color: #45a049;
         }
         .result {
             margin-top: 20px;
