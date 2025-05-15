@@ -140,7 +140,7 @@ async function uploadFile() {
 
     // Show spinner and reset progress
     spinner.style.display = 'flex';
-    progressText.textContent = '0%';
+    progressText.textContent = 'Uploading...';
 
     try {
         const xhr = new XMLHttpRequest();
@@ -153,16 +153,28 @@ async function uploadFile() {
             }
         };
 
+        xhr.upload.onloadend = function () {
+            // Upload done, waiting for server
+            progressText.textContent = 'Processing...';
+        };
+
         xhr.onload = function () {
-            spinner.style.display = 'none';
-            if (xhr.status === 200) {
+            try {
                 const data = JSON.parse(xhr.responseText);
-                resultDiv.innerHTML = `<p>Volume: ${data.volume.toFixed(2)} cubic cm</p>
-                                       <p>Price: $${data.price.toFixed(2)}</p>`;
-            } else {
-                const data = JSON.parse(xhr.responseText);
-                resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+
+                if (xhr.status === 200) {
+                    resultDiv.innerHTML = `<p>Volume: ${data.volume.toFixed(2)} cubic cm</p>
+                                           <p>Price: $${data.price.toFixed(2)}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                }
+
+            } catch (e) {
+                resultDiv.innerHTML = `<p class="error">Invalid response from server.</p>`;
             }
+
+            // ✅ Hide spinner after server processing
+            spinner.style.display = 'none';
         };
 
         xhr.onerror = function () {
@@ -176,7 +188,6 @@ async function uploadFile() {
         spinner.style.display = 'none';
         resultDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
     }
-}
-</script>
+}</script>
 </body>
 </html>
