@@ -84,17 +84,18 @@
 <!-- Spinner CSS -->
 <style>
 .spinner-overlay {
-    position: fixed;
+    position: relative;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: none;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: auto;
     flex-direction: column;
+    pointer-events: none;		 /* let clicks through */
 }
 
 .spinner {
@@ -188,6 +189,7 @@ async function uploadFile() {
         spinner.style.display = 'none';
         resultDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
     }
-}</script>
+}
+</script>
 </body>
 </html>
