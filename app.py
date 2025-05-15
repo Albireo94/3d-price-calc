@@ -14,7 +14,7 @@ from OCC.Core.TopoDS import topods_Solid
 
 def calculate_step_volume(filepath):
     try:
-        # Load the STEP file
+        # Load the STEP file - zkouška, jestli lze načíst STEP soubor
         step_reader = STEPControl_Reader()
         status = step_reader.ReadFile(filepath)
 
