@@ -89,21 +89,37 @@
 </head>
 <body>
 
-  <!-- ✅ Main UI -->
-  <div class="container">
-    <h2>Upload 3D Model</h2>
-
-    <input type="file" id="fileInput" accept=".stl,.step,.stp" />
-
-    <button onclick="uploadFile()">Upload</button>
-
-    <div id="spinner" class="spinner-overlay">
-      <div class="spinner"></div>
-      <div id="progressText" class="progress-text">0%</div>
+  <!-- ✅ Main UI -->			    /* ZFORMÁTOVAT CONTAINER */
+<div class="container">
+    <!-- Step 1: File Upload -->
+    <div id="step1">
+        <h2>Upload 3D Model</h2>
+        <input type="file" id="fileInput" accept=".stl,.step,.stp">
+        <button onclick="uploadFile()">Upload</button>
+        <button onclick="goToStep(2)">Next</button>
+        <div id="spinner" class="spinner-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <div id="progressText" class="progress-text">0%</div>
+        </div>
+        <div id="result" class="result"></div>
     </div>
 
-    <div id="result" class="result"></div>
-  </div>
+    <!-- Step 2: Text input and nav buttons -->
+    <div id="step2" style="display: none;">
+        <h2>Model Description</h2>
+        <input type="text" id="description" placeholder="Enter description..." style="width: 100%; padding: 10px; margin-bottom: 20px;">
+        <button onclick="goToStep(1)">Back</button>
+        <button onclick="goToStep(3)">Next</button>
+    </div>
+
+    <!-- Optional: Step 3 or success message -->
+    <div id="step3" style="display: none;">
+        <h2>Thank you!</h2>
+        <p>Your file and description were received.</p>
+        <button onclick="goToStep(1)">Start Over</button>
+    </div>
+</div>
+
 
   <!-- ⚙️ JavaScript -->
   <script>
@@ -171,6 +187,18 @@
       }
     }
   </script>
+
+<script>	 /* ZFORMÁTOVAT */
+function goToStep(step) {
+    // Hide all steps
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("step2").style.display = "none";
+    document.getElementById("step3").style.display = "none";
+
+    // Show selected step
+    document.getElementById(`step${step}`).style.display = "block";
+}
+</script>
 
 </body>
 </html>

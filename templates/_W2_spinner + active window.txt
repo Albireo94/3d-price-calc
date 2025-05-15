@@ -1,195 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Model Upload</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
-        }
-        .container {
-            text-align: center;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
-        }
-        input[type="file"] {
-            margin: 20px 0;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .result {
-            margin-top: 20px;
-        }
-        .error {
-            color: red;
-        }
-    /* Add spinner styles here */
-    #spinner {
-        display: none;
-        margin-top: 20px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3D Model Upload</title>
+
+  <!-- 🌈 Basic Styling -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f9;
     }
 
-    .loader {
-        border: 6px solid #f3f3f3;
-        border-top: 6px solid #4CAF50;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-        margin: 0 auto;
+    .container {
+      text-align: center;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
+
+    input[type="file"] {
+      margin: 20px 0;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #FFD700;
+      color: black;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    button:hover {
+      background-color: black;
+      color: white;
+    }
+
+    .result {
+      margin-top: 20px;
+    }
+
+    .error {
+      color: red;
+    }
+
+    /* 🔄 Spinner */
+    .spinner-overlay {
+      display: none;
+      margin-top: 20px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #4CAF50;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+
+    .progress-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
     }
 
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
-</style>
-
-    </style>
+  </style>
 </head>
 <body>
 
-<!-- Your existing container -->
-<div class="container">
+  <!-- ✅ Main UI -->
+  <div class="container">
     <h2>Upload 3D Model</h2>
-    <input type="file" id="fileInput" accept=".stl,.step,.stp">
+
+    <input type="file" id="fileInput" accept=".stl,.step,.stp" />
+
     <button onclick="uploadFile()">Upload</button>
-    <div id="spinner" class="spinner-overlay" style="display: none;">
-        <div class="spinner"></div>
-        <div id="progressText" class="progress-text">0%</div>
+
+    <div id="spinner" class="spinner-overlay">
+      <div class="spinner"></div>
+      <div id="progressText" class="progress-text">0%</div>
     </div>
+
     <div id="result" class="result"></div>
-</div>
+  </div>
 
-<!-- Spinner CSS -->
-<style>
-.spinner-overlay {
-    position: relative;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: auto;
-    flex-direction: column;
-    pointer-events: none;		 /* let clicks through */
-}
+  <!-- ⚙️ JavaScript -->
+  <script>
+    async function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const resultDiv = document.getElementById('result');
+      const spinner = document.getElementById('spinner');
+      const progressText = document.getElementById('progressText');
 
-.spinner {
-    border: 6px solid #f3f3f3;
-    border-top: 6px solid #4CAF50;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-}
+      resultDiv.innerHTML = '';
 
-.progress-text {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-</style>
-
-<!-- JavaScript with progress -->
-<script>
-async function uploadFile() {
-    const fileInput = document.getElementById('fileInput');
-    const resultDiv = document.getElementById('result');
-    const spinner = document.getElementById('spinner');
-    const progressText = document.getElementById('progressText');
-
-    resultDiv.innerHTML = '';
-
-    if (!fileInput.files.length) {
+      if (!fileInput.files.length) {
         resultDiv.innerHTML = '<p class="error">Please select a file to upload.</p>';
         return;
-    }
+      }
 
-    const file = fileInput.files[0];
-    const formData = new FormData();
-    formData.append('file', file);
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
 
-    // Show spinner and reset progress
-    spinner.style.display = 'flex';
-    progressText.textContent = 'Uploading...';
+      spinner.style.display = 'flex';
+      progressText.textContent = 'Uploading...';
 
-    try {
+      try {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "/upload", true);
 
         xhr.upload.onprogress = function (event) {
-            if (event.lengthComputable) {
-                const percentComplete = Math.round((event.loaded / event.total) * 100);
-                progressText.textContent = `${percentComplete}%`;
-            }
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            progressText.textContent = `${percent}%`;
+          }
         };
 
         xhr.upload.onloadend = function () {
-            // Upload done, waiting for server
-            progressText.textContent = 'Processing...';
+          progressText.textContent = 'Processing...';
         };
 
         xhr.onload = function () {
-            try {
-                const data = JSON.parse(xhr.responseText);
+          spinner.style.display = 'none';
 
-                if (xhr.status === 200) {
-                    resultDiv.innerHTML = `<p>Volume: ${data.volume.toFixed(2)} cubic cm</p>
-                                           <p>Price: $${data.price.toFixed(2)}</p>`;
-                } else {
-                    resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
-                }
-
-            } catch (e) {
-                resultDiv.innerHTML = `<p class="error">Invalid response from server.</p>`;
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (xhr.status === 200) {
+              resultDiv.innerHTML = `
+                <p>Volume: ${data.volume.toFixed(2)} cubic cm</p>
+                <p>Price: $${data.price.toFixed(2)}</p>`;
+            } else {
+              resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
             }
-
-            // ✅ Hide spinner after server processing
-            spinner.style.display = 'none';
+          } catch {
+            resultDiv.innerHTML = `<p class="error">Invalid response from server.</p>`;
+          }
         };
 
         xhr.onerror = function () {
-            spinner.style.display = 'none';
-            resultDiv.innerHTML = `<p class="error">An error occurred while uploading.</p>`;
+          spinner.style.display = 'none';
+          resultDiv.innerHTML = `<p class="error">An error occurred while uploading.</p>`;
         };
 
         xhr.send(formData);
-
-    } catch (error) {
+      } catch (error) {
         spinner.style.display = 'none';
         resultDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
+      }
     }
-}
-</script>
+  </script>
+
 </body>
 </html>
