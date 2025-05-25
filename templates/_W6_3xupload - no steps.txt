@@ -9,7 +9,7 @@
       font-family: Arial, sans-serif;
       background-color: #f4f4f9;
       margin: 0;
-      padding: 60px 0 0;
+      padding: 60px 0 20px;
       display: flex;
       justify-content: center;
       align-items: flex-start;
