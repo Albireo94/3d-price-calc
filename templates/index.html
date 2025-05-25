@@ -3,80 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Model Upload</title>
+  <title>Upload 3D Models</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: #f4f4f9;
     }
 
     .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       width: 400px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       text-align: center;
     }
 
-    .upload-group {
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .upload-block {
+      margin-bottom: 20px;
+    }
+
+    .upload-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       margin-bottom: 10px;
     }
 
-    .upload-group input[type="file"] {
+    input[type="file"] {
       flex: 1;
     }
 
-    .upload-group button {
-      margin-left: 10px;
+    button.upload-btn {
       background-color: #FFD700;
       border: none;
-      padding: 5px 10px;
+      padding: 8px 12px;
       border-radius: 5px;
       cursor: pointer;
-    }
-
-    .progress-container {
-      height: 24px;
-      display: flex;
-      align-items: center;
-      margin: 5px 0 15px;
+      font-weight: bold;
     }
 
     .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #4CAF50;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
       border-radius: 50%;
       width: 20px;
       height: 20px;
       animation: spin 1s linear infinite;
-      margin-right: 10px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .progress-text {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      margin-top: 4px;
     }
 
     .result, .total {
       border: 2px solid black;
       padding: 10px;
       margin: 10px 0;
+      min-height: 30px;
     }
 
-    button#nextBtn {
-      background-color: #FFD700;
+    .next-button {
+      margin-top: 20px;
       padding: 10px 20px;
+      background-color: #FFD700;
+      color: black;
       border: none;
+      cursor: pointer;
       border-radius: 5px;
       font-weight: bold;
-      cursor: pointer;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -84,44 +101,57 @@
   <div class="container">
     <h2>Upload 3D Model</h2>
 
-    <!-- Upload Sections -->
-    <div id="uploads"></div>
+    <div class="upload-block" id="uploadBlock"></div>
 
-    <!-- Results Section -->
-    <div id="results"></div>
-    <div class="total" id="totalPrice">Total price: $0.00</div>
+    <div id="priceResults" class="result"></div>
+    <div id="totalPrice" class="total"></div>
 
-    <button id="nextBtn">Next</button>
+    <button class="next-button">Next</button>
   </div>
 
   <script>
-    const uploadCount = 3;
+    const MAX_FILES = 3;
+    const uploadBlock = document.getElementById('uploadBlock');
+    const priceResults = document.getElementById('priceResults');
+    const totalPriceDisplay = document.getElementById('totalPrice');
+
     let totalPrice = 0;
 
-    function createUploadField(index) {
-      const container = document.getElementById('uploads');
-
-      const group = document.createElement('div');
-      group.className = 'upload-group';
-      group.innerHTML = `
+    function createUploadRow(index) {
+      const row = document.createElement('div');
+      row.className = 'upload-row';
+      row.innerHTML = `
         <input type="file" id="file${index}" accept=".stl,.step,.stp">
-        <button onclick="uploadFile(${index})">Upload</button>
+        <button class="upload-btn" onclick="uploadFile(${index})">Upload</button>
       `;
-      container.appendChild(group);
 
-      const progressContainer = document.createElement('div');
-      progressContainer.className = 'progress-container';
-      progressContainer.id = `progress${index}`;
-      container.appendChild(progressContainer);
+      const progress = document.createElement('div');
+      progress.id = `progress${index}`;
+      progress.className = 'progress-text';
+
+      const result = document.createElement('div');
+      result.id = `result${index}`;
+      result.className = 'result';
+
+      uploadBlock.appendChild(row);
+      uploadBlock.appendChild(progress);
+      uploadBlock.appendChild(result);
+    }
+
+    for (let i = 0; i < MAX_FILES; i++) {
+      createUploadRow(i);
     }
 
     function uploadFile(index) {
       const fileInput = document.getElementById(`file${index}`);
-      const progressDiv = document.getElementById(`progress${index}`);
-      const resultsDiv = document.getElementById('results');
+      const progressText = document.getElementById(`progress${index}`);
+      const resultDiv = document.getElementById(`result${index}`);
+
+      resultDiv.innerHTML = '';
+      progressText.innerHTML = '';
 
       if (!fileInput.files.length) {
-        alert("Please select a file.");
+        progressText.innerHTML = '<span style="color:red">Select a file first.</span>';
         return;
       }
 
@@ -129,47 +159,45 @@
       const formData = new FormData();
       formData.append('file', file);
 
-      progressDiv.innerHTML = `<div class="spinner"></div><span id="percent${index}">0%</span>`;
-
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/upload", true);
 
-      xhr.upload.onprogress = function (event) {
+      const spinner = document.createElement('span');
+      spinner.className = 'spinner';
+      progressText.appendChild(spinner);
+      progressText.appendChild(document.createTextNode(' 0%'));
+
+      xhr.upload.onprogress = function(event) {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
-          document.getElementById(`percent${index}`).textContent = `${percent}%`;
+          progressText.childNodes[1].nodeValue = ` ${percent}%`;
+          if (percent === 100) {
+            progressText.childNodes[1].nodeValue = ` 100% - Processing...`;
+          }
         }
       };
 
-      xhr.onload = function () {
-        progressDiv.innerHTML = '';
+      xhr.onload = function() {
+        progressText.innerHTML = '';
         if (xhr.status === 200) {
           const data = JSON.parse(xhr.responseText);
           const volume = data.volume.toFixed(2);
           const price = data.price.toFixed(2);
-          totalPrice += parseFloat(data.price);
+          resultDiv.innerHTML = `Volume: ${volume} cm³<br>Price: $${price}`;
 
-          const resultBox = document.createElement('div');
-          resultBox.className = 'result';
-          resultBox.textContent = `Model ${index + 1}: ${volume} cm³, $${price}`;
-          resultsDiv.appendChild(resultBox);
-
-          document.getElementById('totalPrice').textContent = `Total price: $${totalPrice.toFixed(2)}`;
+          totalPrice += parseFloat(price);
+          totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
         } else {
-          alert("Upload failed.");
+          resultDiv.innerHTML = `<span style="color:red">Error: ${xhr.responseText}</span>`;
         }
       };
 
-      xhr.onerror = function () {
-        progressDiv.innerHTML = '';
-        alert("Upload error.");
+      xhr.onerror = function() {
+        progressText.innerHTML = '';
+        resultDiv.innerHTML = '<span style="color:red">Upload error</span>';
       };
 
       xhr.send(formData);
-    }
-
-    for (let i = 0; i < uploadCount; i++) {
-      createUploadField(i);
     }
   </script>
 </body>
