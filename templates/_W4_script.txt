@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3D Model Upload</title>
+
+  <!-- 🌈 Basic Styling -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 60px 0 20px; /* ⬅️ Top: 60px, Bottom: 20px */
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 80vh;
+      background-color: rgba(255, 255, 255, 0.8); /* white with 20% transparency */
+    }
+
+    .container {
+      text-align: center;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
+
+    input[type="file"] {
+      margin: 20px 0;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #FFD700;
+      color: black;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    button:hover {
+      background-color: black;
+      color: white;
+    }
+
+    .result {
+      margin-top: 20px;
+    }
+
+    .error {
+      color: red;
+    }
+
+    /* 🔄 Spinner */
+    .spinner-overlay {
+      display: none;
+      margin-top: 20px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #4CAF50;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+
+    .progress-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ✅ Main UI -->			   
+<div class="container">
+    <!-- Step 1: File Upload -->
+    <div id="step1">
+        <h2>Upload 3D Model</h2>
+
+        <input type="file" id="file1" accept=".stl,.step,.stp"><br><br>
+	<input type="file" id="file2" accept=".stl,.step,.stp"><br><br>
+	<input type="file" id="file3" accept=".stl,.step,.stp"><br><br>
+
+	<button onclick="uploadMultipleFiles()">Upload</button>
+	<button onclick="goToStep(2)">Next</button>
+
+	<div id="spinner" class="spinner-overlay" style="display: none;">
+ 	<div class="spinner"></div>
+ 	<div id="progressText" class="progress-text">0%</div>
+
+	</div>
+	<div id="result" class="result"></div>
+
+    </div>
+
+    <!-- Step 2: Text input and nav buttons -->
+    <div id="step2" style="display: none;">
+        <h2>Model Description</h2>
+        <input type="text" id="description" placeholder="Enter description..." style="width: 100%; padding: 10px; margin-bottom: 20px;">
+        <button onclick="goToStep(1)">Back</button>
+        <button onclick="goToStep(3)">Next</button>
+    </div>
+
+    <!-- Optional: Step 3 or success message -->
+    <div id="step3" style="display: none;">
+        <h2>Thank you!</h2>
+        <p>Your file and description were received.</p>
+        <button onclick="goToStep(1)">Start Over</button>
+    </div>
+</div>
+
+
+  <!-- ⚙️ JavaScript -->
+<script>
+async function uploadMultipleFiles() {
+  const fileInputs = [
+    document.getElementById('file1'),
+    document.getElementById('file2'),
+    document.getElementById('file3')
+  ];
+
+  const resultDiv = document.getElementById('result');
+  const spinner = document.getElementById('spinner');
+  const progressTexts = [
+  document.getElementById('progressText1'),
+  document.getElementById('progressText2'),
+  document.getElementById('progressText3')
+];
+
+  resultDiv.innerHTML = '';
+  spinner.style.display = 'flex';
+  progressText.textContent = 'Starting upload...';
+
+  let total = 0;
+  const results = [];
+
+  for (let i = 0; i < fileInputs.length; i++) {
+    const fileInput = fileInputs[i];
+    const file = fileInput.files[0];
+
+    if (!file) {
+      results.push(`<p class="error">File ${i + 1}: No file selected.</p>`);
+      continue;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const xhr = new XMLHttpRequest();
+
+    const fileIndex = i + 1;
+
+    xhr.upload.onprogress = function (event) {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        progressTexts[i].textContent = `File ${fileIndex}: ${percent}% uploaded`;
+      }
+    };
+
+    xhr.upload.onloadend = function () {
+      progressTexts[i].textContent = `File ${fileIndex}: Processing...`;
+    };
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          total += data.price;
+          results.push(`
+            <p><strong>File ${fileIndex}:</strong></p>
+            <p>Volume: ${data.volume.toFixed(2)} cm³</p>
+            <p>Price: $${data.price.toFixed(2)}</p>
+          `);
+        } else {
+          try {
+            const err = JSON.parse(xhr.responseText);
+            results.push(`<p class="error">File ${fileIndex}: ${err.error}</p>`);
+          } catch {
+            results.push(`<p class="error">File ${fileIndex}: Upload failed.</p>`);
+          }
+        }
+
+        // If this was the last file, hide spinner and show total
+        if (fileIndex === fileInputs.length) {
+          spinner.style.display = 'none';
+          resultDiv.innerHTML = results.join('') + `<hr><p><strong>Total Price: $${total.toFixed(2)}</strong></p>`;
+        }
+      }
+    };
+
+    xhr.open('POST', '/upload', true);
+    xhr.send(formData);
+
+    // Wait for current upload to finish before continuing to next
+    await new Promise(resolve => {
+      xhr.onloadend = () => {
+        resolve();
+      };
+    });
+  }
+}
+</script>
+
+
+<script>
+function goToStep(step) {
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").style.display = "none";
+  document.getElementById("step3").style.display = "none";
+  document.getElementById(`step${step}`).style.display = "block";
+}
+</script>
+
+</body>
+</html>
