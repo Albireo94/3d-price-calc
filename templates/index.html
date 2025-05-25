@@ -94,14 +94,21 @@
     <!-- Step 1: File Upload -->
     <div id="step1">
         <h2>Upload 3D Model</h2>
-        <input type="file" id="fileInput" accept=".stl,.step,.stp">
-        <button onclick="uploadFile()">Upload</button>
-        <button onclick="goToStep(2)">Next</button>
-        <div id="spinner" class="spinner-overlay" style="display: none;">
-            <div class="spinner"></div>
-            <div id="progressText" class="progress-text">0%</div>
-        </div>
-        <div id="result" class="result"></div>
+
+        <input type="file" id="file1" accept=".stl,.step,.stp"><br><br>
+	<input type="file" id="file2" accept=".stl,.step,.stp"><br><br>
+	<input type="file" id="file3" accept=".stl,.step,.stp"><br><br>
+
+	<button onclick="uploadMultipleFiles()">Upload</button>
+	<button onclick="goToStep(2)">Next</button>
+
+	<div id="spinner" class="spinner-overlay" style="display: none;">
+ 	<div class="spinner"></div>
+ 	<div id="progressText" class="progress-text">0%</div>
+
+	</div>
+	<div id="result" class="result"></div>
+
     </div>
 
     <!-- Step 2: Text input and nav buttons -->
@@ -122,81 +129,71 @@
 
 
   <!-- ⚙️ JavaScript -->
-  <script>
-    async function uploadFile() {
-      const fileInput = document.getElementById('fileInput');
-      const resultDiv = document.getElementById('result');
-      const spinner = document.getElementById('spinner');
-      const progressText = document.getElementById('progressText');
+<script>
+async function uploadMultipleFiles() {
+  const fileInputs = [
+    document.getElementById('file1'),
+    document.getElementById('file2'),
+    document.getElementById('file3')
+  ];
 
-      resultDiv.innerHTML = '';
+  const resultDiv = document.getElementById('result');
+  const spinner = document.getElementById('spinner');
+  const progressText = document.getElementById('progressText');
 
-      if (!fileInput.files.length) {
-        resultDiv.innerHTML = '<p class="error">Please select a file to upload.</p>';
-        return;
-      }
+  resultDiv.innerHTML = '';
+  spinner.style.display = 'flex';
+  progressText.textContent = 'Uploading...';
 
-      const file = fileInput.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
+  let total = 0;
+  const results = [];
 
-      spinner.style.display = 'flex';
-      progressText.textContent = 'Uploading...';
+  for (let i = 0; i < fileInputs.length; i++) {
+    const fileInput = fileInputs[i];
+    const file = fileInput.files[0];
 
-      try {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/upload", true);
-
-        xhr.upload.onprogress = function (event) {
-          if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100);
-            progressText.textContent = `${percent}%`;
-          }
-        };
-
-        xhr.upload.onloadend = function () {
-          progressText.textContent = 'Processing...';
-        };
-
-        xhr.onload = function () {
-          spinner.style.display = 'none';
-
-          try {
-            const data = JSON.parse(xhr.responseText);
-            if (xhr.status === 200) {
-              resultDiv.innerHTML = `
-                <p>Volume: ${data.volume.toFixed(2)} cubic cm</p>
-                <p>Price: $${data.price.toFixed(2)}</p>`;
-            } else {
-              resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
-            }
-          } catch {
-            resultDiv.innerHTML = `<p class="error">Invalid response from server.</p>`;
-          }
-        };
-
-        xhr.onerror = function () {
-          spinner.style.display = 'none';
-          resultDiv.innerHTML = `<p class="error">An error occurred while uploading.</p>`;
-        };
-
-        xhr.send(formData);
-      } catch (error) {
-        spinner.style.display = 'none';
-        resultDiv.innerHTML = `<p class="error">An error occurred: ${error.message}</p>`;
-      }
+    if (!file) {
+      results.push(`<p class="error">File ${i + 1}: No file selected.</p>`);
+      continue;
     }
-  </script>
 
-<script>	
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        results.push(`<p class="error">File ${i + 1}: ${data.error}</p>`);
+      } else {
+        total += data.price;
+        results.push(`
+          <p><strong>File ${i + 1}:</strong></p>
+          <p>Volume: ${data.volume.toFixed(2)} cm³</p>
+          <p>Price: $${data.price.toFixed(2)}</p>
+        `);
+      }
+    } catch (err) {
+      results.push(`<p class="error">File ${i + 1}: Upload failed.</p>`);
+    }
+  }
+
+  spinner.style.display = 'none';
+  resultDiv.innerHTML = results.join('') + `<hr><p><strong>Total Price: $${total.toFixed(2)}</strong></p>`;
+}
+</script>
+
+<script>
 function goToStep(step) {
-    // Hide all steps
-    document.getElementById("step1").style.display = "none";
-    document.getElementById("step2").style.display = "none";
-    document.getElementById("step3").style.display = "none";
-
-    // Show selected step
-    document.getElementById(`step${step}`).style.display = "block";
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").style.display = "none";
+  document.getElementById("step3").style.display = "none";
+  document.getElementById(`step${step}`).style.display = "block";
 }
 </script>
 
