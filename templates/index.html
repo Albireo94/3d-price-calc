@@ -143,7 +143,7 @@ async function uploadMultipleFiles() {
 
   resultDiv.innerHTML = '';
   spinner.style.display = 'flex';
-  progressText.textContent = 'Uploading...';
+  progressText.textContent = 'Starting upload...';
 
   let total = 0;
   const results = [];
@@ -160,33 +160,61 @@ async function uploadMultipleFiles() {
     const formData = new FormData();
     formData.append('file', file);
 
-    try {
-      const response = await fetch('/upload', {
-        method: 'POST',
-        body: formData
-      });
+    const xhr = new XMLHttpRequest();
 
-      const data = await response.json();
+    const fileIndex = i + 1;
 
-      if (!response.ok) {
-        results.push(`<p class="error">File ${i + 1}: ${data.error}</p>`);
-      } else {
-        total += data.price;
-        results.push(`
-          <p><strong>File ${i + 1}:</strong></p>
-          <p>Volume: ${data.volume.toFixed(2)} cm³</p>
-          <p>Price: $${data.price.toFixed(2)}</p>
-        `);
+    xhr.upload.onprogress = function (event) {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        progressText.textContent = `File ${fileIndex}: ${percent}% uploaded`;
       }
-    } catch (err) {
-      results.push(`<p class="error">File ${i + 1}: Upload failed.</p>`);
-    }
-  }
+    };
 
-  spinner.style.display = 'none';
-  resultDiv.innerHTML = results.join('') + `<hr><p><strong>Total Price: $${total.toFixed(2)}</strong></p>`;
+    xhr.upload.onloadend = function () {
+      progressText.textContent = `File ${fileIndex}: Processing...`;
+    };
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
+          total += data.price;
+          results.push(`
+            <p><strong>File ${fileIndex}:</strong></p>
+            <p>Volume: ${data.volume.toFixed(2)} cm³</p>
+            <p>Price: $${data.price.toFixed(2)}</p>
+          `);
+        } else {
+          try {
+            const err = JSON.parse(xhr.responseText);
+            results.push(`<p class="error">File ${fileIndex}: ${err.error}</p>`);
+          } catch {
+            results.push(`<p class="error">File ${fileIndex}: Upload failed.</p>`);
+          }
+        }
+
+        // If this was the last file, hide spinner and show total
+        if (fileIndex === fileInputs.length) {
+          spinner.style.display = 'none';
+          resultDiv.innerHTML = results.join('') + `<hr><p><strong>Total Price: $${total.toFixed(2)}</strong></p>`;
+        }
+      }
+    };
+
+    xhr.open('POST', '/upload', true);
+    xhr.send(formData);
+
+    // Wait for current upload to finish before continuing to next
+    await new Promise(resolve => {
+      xhr.onloadend = () => {
+        resolve();
+      };
+    });
+  }
 }
 </script>
+
 
 <script>
 function goToStep(step) {
