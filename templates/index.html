@@ -78,10 +78,17 @@
       margin-top: 4px;
     }
 
-    .result, .total {
+    .result {
       border: 2px solid black;
       padding: 10px;
       margin: 10px 0;
+      min-height: 30px;
+    }
+
+    .total {
+      border: 2px solid black;
+      padding: 10px;
+      margin-top: 10px;
       min-height: 30px;
     }
 
@@ -103,7 +110,6 @@
 
     <div class="upload-block" id="uploadBlock"></div>
 
-    <div id="priceResults" class="result"></div>
     <div id="totalPrice" class="total"></div>
 
     <button class="next-button">Next</button>
@@ -112,7 +118,6 @@
   <script>
     const MAX_FILES = 3;
     const uploadBlock = document.getElementById('uploadBlock');
-    const priceResults = document.getElementById('priceResults');
     const totalPriceDisplay = document.getElementById('totalPrice');
 
     let totalPrice = 0;
@@ -165,14 +170,15 @@
       const spinner = document.createElement('span');
       spinner.className = 'spinner';
       progressText.appendChild(spinner);
-      progressText.appendChild(document.createTextNode(' 0%'));
+      const percentText = document.createTextNode(' 0%');
+      progressText.appendChild(percentText);
 
       xhr.upload.onprogress = function(event) {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
-          progressText.childNodes[1].nodeValue = ` ${percent}%`;
+          percentText.nodeValue = ` ${percent}%`;
           if (percent === 100) {
-            progressText.childNodes[1].nodeValue = ` 100% - Processing...`;
+            percentText.nodeValue = ` 100% - Processing...`;
           }
         }
       };
