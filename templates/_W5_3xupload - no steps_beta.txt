@@ -30,7 +30,7 @@
     }
 
     .upload-block {
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
 
     .upload-row {
@@ -38,7 +38,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 5px;
+      margin-bottom: 10px;
     }
 
     input[type="file"] {
@@ -75,19 +75,19 @@
       font-size: 14px;
       font-weight: bold;
       color: #333;
-      margin-bottom: 4px;
+      margin-top: 4px;
     }
 
     .result {
-      margin: 4px 0 10px;
-      font-weight: bold;
+      padding: 10px;
+      margin: 10px 0;
+      min-height: 30px;
     }
 
     .total {
-      margin-top: 12px;
-      font-weight: bold;
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
+      padding: 10px;
+      margin-top: 10px;
+      min-height: 30px;
     }
 
     .next-button {
@@ -108,8 +108,6 @@
 
     <div class="upload-block" id="uploadBlock"></div>
 
-    <div id="resultsContainer"></div>
-
     <div id="totalPrice" class="total"></div>
 
     <button class="next-button">Next</button>
@@ -118,7 +116,6 @@
   <script>
     const MAX_FILES = 3;
     const uploadBlock = document.getElementById('uploadBlock');
-    const resultsContainer = document.getElementById('resultsContainer');
     const totalPriceDisplay = document.getElementById('totalPrice');
 
     let totalPrice = 0;
@@ -135,8 +132,13 @@
       progress.id = `progress${index}`;
       progress.className = 'progress-text';
 
+      const result = document.createElement('div');
+      result.id = `result${index}`;
+      result.className = 'result';
+
       uploadBlock.appendChild(row);
       uploadBlock.appendChild(progress);
+      uploadBlock.appendChild(result);
     }
 
     for (let i = 0; i < MAX_FILES; i++) {
@@ -146,13 +148,15 @@
     function uploadFile(index) {
       const fileInput = document.getElementById(`file${index}`);
       const progressText = document.getElementById(`progress${index}`);
+      const resultDiv = document.getElementById(`result${index}`);
+
+      resultDiv.innerHTML = '';
+      progressText.innerHTML = '';
 
       if (!fileInput.files.length) {
         progressText.innerHTML = '<span style="color:red">Select a file first.</span>';
         return;
       }
-
-      progressText.innerHTML = '';
 
       const file = fileInput.files[0];
       const formData = new FormData();
@@ -183,28 +187,18 @@
           const data = JSON.parse(xhr.responseText);
           const volume = data.volume.toFixed(2);
           const price = data.price.toFixed(2);
-
-          const resultDiv = document.createElement('div');
-          resultDiv.className = 'result';
-          resultDiv.innerHTML = `Model ${index + 1}: Volume: ${volume} cm³, Price: $${price}`;
-          resultsContainer.appendChild(resultDiv);
+          resultDiv.innerHTML = `Volume: ${volume} cm³<br>Price: $${price}`;
 
           totalPrice += parseFloat(price);
           totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
         } else {
-          const resultDiv = document.createElement('div');
-          resultDiv.className = 'result';
           resultDiv.innerHTML = `<span style="color:red">Error: ${xhr.responseText}</span>`;
-          resultsContainer.appendChild(resultDiv);
         }
       };
 
       xhr.onerror = function() {
         progressText.innerHTML = '';
-        const resultDiv = document.createElement('div');
-        resultDiv.className = 'result';
         resultDiv.innerHTML = '<span style="color:red">Upload error</span>';
-        resultsContainer.appendChild(resultDiv);
       };
 
       xhr.send(formData);
