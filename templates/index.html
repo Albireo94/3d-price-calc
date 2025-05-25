@@ -19,16 +19,22 @@
     }
 
     .container {
+      width: 400px;
       text-align: center;
       background-color: white;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      width: 400px;
     }
 
     input[type="file"] {
       margin: 20px 0;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
     }
 
     button {
@@ -40,6 +46,7 @@
       border-radius: 5px;
       font-weight: bold;
       transition: background-color 0.3s, color 0.3s;
+      margin: 5px;
     }
 
     button:hover {
@@ -89,40 +96,53 @@
 </head>
 <body>
 
-  <!-- ✅ Main UI -->			   
-<div class="container">
+  <!-- ✅ Main UI Container -->
+  <div class="container">
+
     <!-- Step 1: File Upload -->
     <div id="step1">
-        <h2>Upload 3D Model</h2>
-        <input type="file" id="fileInput" accept=".stl,.step,.stp">
-        <button onclick="uploadFile()">Upload</button>
-        <button onclick="goToStep(2)">Next</button>
-        <div id="spinner" class="spinner-overlay" style="display: none;">
-            <div class="spinner"></div>
-            <div id="progressText" class="progress-text">0%</div>
-        </div>
-        <div id="result" class="result"></div>
+      <h2>Upload 3D Model</h2>
+      <input type="file" id="fileInput" accept=".stl,.step,.stp">
+      <button onclick="uploadFile()">Upload</button>
+      <button onclick="goToStep(2)">Next</button>
+
+      <!-- Spinner -->
+      <div id="spinner" class="spinner-overlay">
+        <div class="spinner"></div>
+        <div id="progressText" class="progress-text">0%</div>
+      </div>
+
+      <!-- Upload Result -->
+      <div id="result" class="result"></div>
     </div>
 
-    <!-- Step 2: Text input and nav buttons -->
+    <!-- Step 2: Model Description -->
     <div id="step2" style="display: none;">
-        <h2>Model Description</h2>
-        <input type="text" id="description" placeholder="Enter description..." style="width: 100%; padding: 10px; margin-bottom: 20px;">
-        <button onclick="goToStep(1)">Back</button>
-        <button onclick="goToStep(3)">Next</button>
+      <h2>Model Description</h2>
+      <input type="text" id="description" placeholder="Enter description...">
+      <button onclick="goToStep(1)">Back</button>
+      <button onclick="goToStep(3)">Next</button>
     </div>
 
-    <!-- Optional: Step 3 or success message -->
+    <!-- Step 3: Success Message -->
     <div id="step3" style="display: none;">
-        <h2>Thank you!</h2>
-        <p>Your file and description were received.</p>
-        <button onclick="goToStep(1)">Start Over</button>
+      <h2>Thank you!</h2>
+      <p>Your file and description were received.</p>
+      <button onclick="goToStep(1)">Start Over</button>
     </div>
-</div>
 
+  </div>
 
   <!-- ⚙️ JavaScript -->
   <script>
+    function goToStep(step) {
+      const steps = ['step1', 'step2', 'step3'];
+      steps.forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById(`step${step}`).style.display = 'block';
+    }
+
     async function uploadFile() {
       const fileInput = document.getElementById('fileInput');
       const resultDiv = document.getElementById('result');
@@ -160,7 +180,6 @@
 
         xhr.onload = function () {
           spinner.style.display = 'none';
-
           try {
             const data = JSON.parse(xhr.responseText);
             if (xhr.status === 200) {
@@ -187,18 +206,6 @@
       }
     }
   </script>
-
-<script>	
-function goToStep(step) {
-    // Hide all steps
-    document.getElementById("step1").style.display = "none";
-    document.getElementById("step2").style.display = "none";
-    document.getElementById("step3").style.display = "none";
-
-    // Show selected step
-    document.getElementById(`step${step}`).style.display = "block";
-}
-</script>
 
 </body>
 </html>
