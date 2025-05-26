@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <title>Upload 3D Models</title>
   <style>
     body {
@@ -43,7 +44,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 5px;
+      margin-bottom: 10px;
     }
 
     input[type="file"] {
@@ -101,7 +102,7 @@
     }
 
     .step-button {
-      margin-top: 20px;
+      margin: 20px 5px 5px; /* Top, Right/Left, Bottom */
       padding: 10px 20px;
       background-color: #fff000;
       color: black;
@@ -109,10 +110,17 @@
       cursor: pointer;
       border-radius: 5px;
       font-weight: bold;
-      margin: 5px;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    h2,
+    .step-button,
+    .upload-btn {
+      font-family: 'Montserrat', sans-serif;
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h2 id="stepTitle">Upload 3D Model</h2>
