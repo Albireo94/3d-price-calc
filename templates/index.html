@@ -30,8 +30,12 @@
       margin-bottom: 20px;
     }
 
-    .upload-block {
-      margin-bottom: 10px;
+    .upload-block, .summary-block, .done-block {
+      display: none;
+    }
+
+    .upload-block.active, .summary-block.active, .done-block.active {
+      display: block;
     }
 
     .upload-row {
@@ -96,7 +100,7 @@
       padding-top: 10px;
     }
 
-    .next-button {
+    .step-button {
       margin-top: 20px;
       padding: 10px 20px;
       background-color: #fff000;
@@ -105,20 +109,31 @@
       cursor: pointer;
       border-radius: 5px;
       font-weight: bold;
+      margin: 5px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Upload 3D Model</h2>
+    <h2 id="stepTitle">Upload 3D Model</h2>
 
-    <div class="upload-block" id="uploadBlock"></div>
-
+    <div class="upload-block active" id="uploadBlock"></div>
     <div id="resultsContainer"></div>
-
     <div id="totalPrice" class="total"></div>
 
-    <button class="next-button">Next</button>
+    <div class="summary-block" id="summaryBlock">
+      <p>All models uploaded. You can review or go back.</p>
+    </div>
+
+    <div class="done-block" id="doneBlock">
+      <p>Process finished. Thank you!</p>
+    </div>
+
+    <div id="stepControls">
+      <button class="step-button" onclick="goBack()" id="backBtn" style="display:none">Back</button>
+      <button class="step-button" onclick="goNext()" id="nextBtn">Next</button>
+      <button class="step-button" onclick="startOver()" id="startOverBtn" style="display:none">Start Over</button>
+    </div>
   </div>
 
   <script>
@@ -126,8 +141,15 @@
     const uploadBlock = document.getElementById('uploadBlock');
     const resultsContainer = document.getElementById('resultsContainer');
     const totalPriceDisplay = document.getElementById('totalPrice');
+    const stepTitle = document.getElementById('stepTitle');
+    const summaryBlock = document.getElementById('summaryBlock');
+    const doneBlock = document.getElementById('doneBlock');
+    const nextBtn = document.getElementById('nextBtn');
+    const backBtn = document.getElementById('backBtn');
+    const startOverBtn = document.getElementById('startOverBtn');
 
     let totalPrice = 0;
+    let currentStep = 1;
 
     function createUploadRow(index) {
       const row = document.createElement('div');
@@ -186,17 +208,25 @@
       xhr.onload = function() {
         progressText.innerHTML = '';
         if (xhr.status === 200) {
-          const data = JSON.parse(xhr.responseText);
-          const volume = data.volume.toFixed(2);
-          const price = data.price.toFixed(2);
+          try {
+            const data = JSON.parse(xhr.responseText);
+            const volume = data.volume.toFixed(2);
+            const price = data.price.toFixed(2);
 
-          const resultDiv = document.createElement('div');
-          resultDiv.className = 'result';
-          resultDiv.innerHTML = `Model ${index + 1}: Volume: ${volume} cm³, Price: $${price}`;
-          resultsContainer.appendChild(resultDiv);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = `Model ${index + 1}: Volume: ${volume} cm³, Price: $${price}`;
+            resultsContainer.appendChild(resultDiv);
 
-          totalPrice += parseFloat(price);
-          totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
+            totalPrice += parseFloat(price);
+            totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
+          } catch (e) {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = `<span style="color:red">Invalid JSON response</span>`;
+            resultsContainer.appendChild(resultDiv);
+            console.error("Failed to parse JSON:", xhr.responseText);
+          }
         } else {
           const resultDiv = document.createElement('div');
           resultDiv.className = 'result';
@@ -214,6 +244,38 @@
       };
 
       xhr.send(formData);
+    }
+
+    function goNext() {
+      if (currentStep === 1) {
+        uploadBlock.classList.remove('active');
+        summaryBlock.classList.add('active');
+        stepTitle.textContent = "Summary";
+        backBtn.style.display = 'inline-block';
+        currentStep++;
+      } else if (currentStep === 2) {
+        summaryBlock.classList.remove('active');
+        doneBlock.classList.add('active');
+        stepTitle.textContent = "Done";
+        nextBtn.style.display = 'none';
+        backBtn.style.display = 'none';
+        startOverBtn.style.display = 'inline-block';
+        currentStep++;
+      }
+    }
+
+    function goBack() {
+      if (currentStep === 2) {
+        summaryBlock.classList.remove('active');
+        uploadBlock.classList.add('active');
+        stepTitle.textContent = "Upload 3D Model";
+        backBtn.style.display = 'none';
+        currentStep--;
+      }
+    }
+
+    function startOver() {
+      location.reload();
     }
   </script>
 </body>
