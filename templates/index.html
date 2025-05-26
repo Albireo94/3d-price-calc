@@ -57,7 +57,7 @@
       padding: 8px 12px;
       border-radius: 5px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 600	;
     }
 
     button:hover {
@@ -156,6 +156,7 @@
 
     let totalPrice = 0;
     let currentStep = 1;
+    let uploadedModels = [];
 
     function createUploadRow(index) {
       const row = document.createElement('div');
@@ -224,8 +225,15 @@
             resultDiv.innerHTML = `Model ${index + 1}: Volume: ${volume} cm³, Price: $${price}`;
             resultsContainer.appendChild(resultDiv);
 
-            totalPrice += parseFloat(price);
-            totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
+uploadedModels.push({
+  index,
+  volume,
+  pricePerUnit: parseFloat(price),
+  quantity: 1 // default 1 piece
+});
+
+renderSummary();
+
           } catch (e) {
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
@@ -251,6 +259,22 @@
 
       xhr.send(formData);
     }
+
+function renderSummary() {
+  summaryBlock.innerHTML = '<p>All models uploaded. You can review quantities below.</p>';
+
+  uploadedModels.forEach((model, i) => {
+    const row = document.createElement('div');
+    row.className = 'upload-row';
+    row.innerHTML = `
+      <span>Model ${i + 1}: Volume: ${model.volume} cm³, Unit Price: $${model.pricePerUnit}</span>
+      <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
+    `;
+    summaryBlock.appendChild(row);
+  });
+
+  updateTotal();
+}
 
     function goNext() {
       if (currentStep === 1) {
@@ -283,6 +307,21 @@
     function startOver() {
       location.reload();
     }
+
+function updateQuantity(index, value) {
+  const qty = parseInt(value);
+  uploadedModels[index].quantity = isNaN(qty) || qty < 1 ? 1 : qty;
+  updateTotal();
+}
+
+function updateTotal() {
+  totalPrice = uploadedModels.reduce((sum, model) => {
+    return sum + model.quantity * model.pricePerUnit;
+  }, 0);
+
+  totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
+}
+
   </script>
 </body>
 </html>
