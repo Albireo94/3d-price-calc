@@ -317,17 +317,26 @@
         const totalVol = (model.volume * model.quantity).toFixed(2);
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
-         <span>
-           Model ${i + 1}: 
-           Volume: ${model.volume} cm³ × ${model.quantity} = <strong>${totalVol} cm³</strong>, 
-           Unit Price: $${model.pricePerUnit} × ${model.quantity} = <strong>$${totalCost}</strong>
-         </span>
-         <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
-        `;
+       <span>
+         Model ${i + 1}: 
+         Volume: ${model.volume} cm³ × ${model.quantity} = <strong>${totalVol} cm³</strong>, 
+         Unit Price: $${model.pricePerUnit} × ${model.quantity} = <strong>$${totalCost}</strong>
+       </span>
+       <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
+    `;
         summaryBlock.appendChild(row);
       });
 
-      updateTotal();
+      // Create or re-create totalPrice div
+      const totalDiv = document.createElement('div');
+      totalDiv.id = 'totalPrice';
+      totalDiv.className = 'total';
+      summaryBlock.appendChild(totalDiv);
+
+      updateTotal(); // now it will work
+    }
+
+    updateTotal();
     }
 
     function renderConfirmation() {
