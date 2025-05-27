@@ -37,6 +37,7 @@
     h2 {
       margin-bottom: 20px;
       font-family: 'Montserrat', sans-serif;
+      font-size: 20 px;
     }
 
     /* Hide blocks by default, only show with .active class */
@@ -139,7 +140,7 @@
 <body>
   <div class="container">
     <!-- Page title -->
-    <h2 id="stepTitle">Nahrajte jeden nebo více 3D modelů</h2>
+    <h2 id="stepTitle">Nahrajte jeden nebo více modelů</h2>
 
     <!-- Upload step (Step 1) -->
     <div class="upload-block active" id="uploadBlock"></div>
@@ -308,7 +309,7 @@
 
     // Show uploaded models with quantity inputs
     function renderSummary() {
-      summaryBlock.innerHTML = '<p>All models uploaded. You can review quantities below.</p>';
+      summaryBlock.innerHTML = '<p>Níže můžete upravit množství.</p>';
 
       uploadedModels.forEach((model, i) => {
         const row = document.createElement('div');
@@ -358,20 +359,20 @@
         // From Upload → Summary
         uploadBlock.classList.remove('active');
         summaryBlock.classList.add('active');
-        stepTitle.textContent = "Summary";
+        stepTitle.textContent = "Souhrn";
         backBtn.style.display = 'inline-block';
         currentStep++;
       } else if (currentStep === 2) {
         summaryBlock.classList.remove('active');
         confirmationBlock.classList.add('active');
-        stepTitle.textContent = "Confirm";
+        stepTitle.textContent = "Potvrzení";
         renderConfirmation(); // ← add this line
         currentStep++;
       } else if (currentStep === 3) {
         // From Confirmation → Done
         confirmationBlock.classList.remove('active');
         doneBlock.classList.add('active');
-        stepTitle.textContent = "Done";
+        stepTitle.textContent = "Hotovo";
         nextBtn.style.display = 'none';
         backBtn.style.display = 'none';
         startOverBtn.style.display = 'inline-block';
@@ -385,14 +386,14 @@
         // Back to Upload
         summaryBlock.classList.remove('active');
         uploadBlock.classList.add('active');
-        stepTitle.textContent = "Upload 3D Model";
+        stepTitle.textContent = "Nahrajte 3D modely";
         backBtn.style.display = 'none';
         currentStep--;
       } else if (currentStep === 3) {
         // Back to Summary
         confirmationBlock.classList.remove('active');
         summaryBlock.classList.add('active');
-        stepTitle.textContent = "Summary";
+        stepTitle.textContent = "Souhrn";
         currentStep--;
       }
     }
