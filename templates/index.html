@@ -200,9 +200,10 @@
 
       // HTML content inside upload row
       row.innerHTML = `
-        <input type="file" id="file${index}" accept=".stl,.step,.stp">
-        <button class="upload-btn" onclick="uploadFile(${index})">Upload</button>
-      `;
+      <span>${index + 1}.</span>
+      <input type="file" id="file${index}" accept=".stl,.step,.stp">
+      <button class="upload-btn" onclick="uploadFile(${index})">Vybrat soubor</button>
+    `;
 
       // Progress text placeholder
       const progress = document.createElement('div');
