@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -39,11 +40,17 @@
     }
 
     /* Hide blocks by default, only show with .active class */
-    .upload-block, .summary-block, .confirmation-block, .done-block {
+    .upload-block,
+    .summary-block,
+    .confirmation-block,
+    .done-block {
       display: none;
     }
 
-    .upload-block.active, .summary-block.active, .confirmation-block.active, .done-block.active {
+    .upload-block.active,
+    .summary-block.active,
+    .confirmation-block.active,
+    .done-block.active {
       display: block;
     }
 
@@ -86,8 +93,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     /* Display of progress text */
@@ -143,7 +155,7 @@
 
     <!-- New Confirmation Step (Step 3) -->
     <div class="confirmation-block" id="confirmationBlock">
-     <p>Please confirm your order before final submission.</p>
+      <p>Please confirm your order before final submission.</p>
     </div>
 
     <!-- Done screen (Step 4)-->
@@ -232,7 +244,7 @@
       progressText.appendChild(percentText);
 
       // Show upload progress %
-      xhr.upload.onprogress = function(event) {
+      xhr.upload.onprogress = function (event) {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
           percentText.nodeValue = ` ${percent}%`;
@@ -243,7 +255,7 @@
       };
 
       // After upload finishes
-      xhr.onload = function() {
+      xhr.onload = function () {
         progressText.innerHTML = '';
         if (xhr.status === 200) {
           try {
@@ -281,7 +293,7 @@
         }
       };
 
-      xhr.onerror = function() {
+      xhr.onerror = function () {
         progressText.innerHTML = '';
         const errorDiv = document.createElement('div');
         errorDiv.className = 'result';
@@ -299,9 +311,15 @@
       uploadedModels.forEach((model, i) => {
         const row = document.createElement('div');
         row.className = 'upload-row';
+        const totalVol = (model.volume * model.quantity).toFixed(2);
+        const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
-          <span>Model ${i + 1}: Volume: ${model.volume} cm³, Unit Price: $${model.pricePerUnit}</span>
-          <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
+         <span>
+           Model ${i + 1}: 
+           Volume: ${model.volume} cm³ × ${model.quantity} = <strong>${totalVol} cm³</strong>, 
+           Unit Price: $${model.pricePerUnit} × ${model.quantity} = <strong>$${totalCost}</strong>
+         </span>
+         <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
         `;
         summaryBlock.appendChild(row);
       });
@@ -309,50 +327,73 @@
       updateTotal();
     }
 
-    // Go to next step (summary or done)
-function goNext() {
-  if (currentStep === 1) {
-    // From Upload → Summary
-    uploadBlock.classList.remove('active');
-    summaryBlock.classList.add('active');
-    stepTitle.textContent = "Summary";
-    backBtn.style.display = 'inline-block';
-    currentStep++;
-  } else if (currentStep === 2) {
-    // From Summary → Confirmation
-    summaryBlock.classList.remove('active');
-    confirmationBlock.classList.add('active');
-    stepTitle.textContent = "Confirm";
-    currentStep++;
-  } else if (currentStep === 3) {
-    // From Confirmation → Done
-    confirmationBlock.classList.remove('active');
-    doneBlock.classList.add('active');
-    stepTitle.textContent = "Done";
-    nextBtn.style.display = 'none';
-    backBtn.style.display = 'none';
-    startOverBtn.style.display = 'inline-block';
-    currentStep++;
-  }
-}
+    function renderConfirmation() {
+      confirmationBlock.innerHTML = '<p>Please confirm your models below:</p>';
 
-    // Go back to upload step
-function goBack() {
-  if (currentStep === 2) {
-    // Back to Upload
-    summaryBlock.classList.remove('active');
-    uploadBlock.classList.add('active');
-    stepTitle.textContent = "Upload 3D Model";
-    backBtn.style.display = 'none';
-    currentStep--;
-  } else if (currentStep === 3) {
-    // Back to Summary
-    confirmationBlock.classList.remove('active');
-    summaryBlock.classList.add('active');
-    stepTitle.textContent = "Summary";
-    currentStep--;
-  }
-}
+      uploadedModels.forEach((model, i) => {
+        const row = document.createElement('div');
+        row.className = 'upload-row';
+
+        const totalVol = (model.volume * model.quantity).toFixed(2);
+        const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
+
+        row.innerHTML = `
+      <span>
+        Model ${i + 1}: 
+        Volume: ${model.volume} cm³ × ${model.quantity} = <strong>${totalVol} cm³</strong>, 
+        Unit Price: $${model.pricePerUnit} × ${model.quantity} = <strong>$${totalCost}</strong>
+      </span>
+     `;
+
+        confirmationBlock.appendChild(row);
+      });
+
+      updateTotal(); // reuse this to display total price
+    }
+    // Go to next step
+    function goNext() {
+      if (currentStep === 1) {
+        // From Upload → Summary
+        uploadBlock.classList.remove('active');
+        summaryBlock.classList.add('active');
+        stepTitle.textContent = "Summary";
+        backBtn.style.display = 'inline-block';
+        currentStep++;
+      } else if (currentStep === 2) {
+        summaryBlock.classList.remove('active');
+        confirmationBlock.classList.add('active');
+        stepTitle.textContent = "Confirm";
+        renderConfirmation(); // ← add this line
+        currentStep++;
+      } else if (currentStep === 3) {
+        // From Confirmation → Done
+        confirmationBlock.classList.remove('active');
+        doneBlock.classList.add('active');
+        stepTitle.textContent = "Done";
+        nextBtn.style.display = 'none';
+        backBtn.style.display = 'none';
+        startOverBtn.style.display = 'inline-block';
+        currentStep++;
+      }
+    }
+
+    // Go back to the last step
+    function goBack() {
+      if (currentStep === 2) {
+        // Back to Upload
+        summaryBlock.classList.remove('active');
+        uploadBlock.classList.add('active');
+        stepTitle.textContent = "Upload 3D Model";
+        backBtn.style.display = 'none';
+        currentStep--;
+      } else if (currentStep === 3) {
+        // Back to Summary
+        confirmationBlock.classList.remove('active');
+        summaryBlock.classList.add('active');
+        stepTitle.textContent = "Summary";
+        currentStep--;
+      }
+    }
 
     // Reload page to restart
     function startOver() {
@@ -375,4 +416,5 @@ function goBack() {
     }
   </script>
 </body>
+
 </html>
