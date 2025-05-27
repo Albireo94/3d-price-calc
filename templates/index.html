@@ -3,21 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <title>Upload 3D Models</title>
+
+  <!-- Import Montserrat font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS Styles -->
   <style>
+    /* Basic styles for body layout */
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
+      background-color: rgba(255, 255, 255, 0.8);
       margin: 0;
       padding: 60px 0 0;
       display: flex;
       justify-content: center;
       align-items: flex-start;
       height: 80vh;
-      background-color: rgba(255, 255, 255, 0.8);
     }
 
+    /* Center container box */
     .container {
       background-color: white;
       padding: 30px;
@@ -27,18 +32,22 @@
       text-align: center;
     }
 
+    /* Heading style */
     h2 {
       margin-bottom: 20px;
+      font-family: 'Montserrat', sans-serif;
     }
 
-    .upload-block, .summary-block, .done-block {
+    /* Hide blocks by default, only show with .active class */
+    .upload-block, .summary-block, .confirmation-block, .done-block {
       display: none;
     }
 
-    .upload-block.active, .summary-block.active, .done-block.active {
+    .upload-block.active, .summary-block.active, .confirmation-block.active, .done-block.active {
       display: block;
     }
 
+    /* Row style for file upload area */
     .upload-row {
       display: flex;
       align-items: center;
@@ -47,17 +56,15 @@
       margin-bottom: 10px;
     }
 
-    input[type="file"] {
-      flex: 1;
-    }
-
+    /* Upload button style */
     button.upload-btn {
       background-color: #fff000;
       border: none;
       padding: 8px 12px;
       border-radius: 5px;
       cursor: pointer;
-      font-weight: 600	;
+      font-weight: 500;
+      font-family: 'Montserrat', sans-serif;
     }
 
     button:hover {
@@ -65,6 +72,7 @@
       color: white;
     }
 
+    /* Spinner animation shown while uploading */
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #4CAF50;
@@ -82,6 +90,7 @@
       100% { transform: rotate(360deg); }
     }
 
+    /* Display of progress text */
     .progress-text {
       font-size: 14px;
       font-weight: bold;
@@ -102,18 +111,14 @@
     }
 
     .step-button {
-      margin: 20px 5px 5px; /* Top, Right/Left, Bottom */
+      margin: 20px 5px 5px;
       padding: 10px 20px;
       background-color: #fff000;
       color: black;
       border: none;
       cursor: pointer;
       border-radius: 5px;
-      font-weight: 600;
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    h2,.step-button,.upload-btn {
+      font-weight: 500;
       font-family: 'Montserrat', sans-serif;
     }
   </style>
@@ -121,20 +126,32 @@
 
 <body>
   <div class="container">
+    <!-- Page title -->
     <h2 id="stepTitle">Upload 3D Model</h2>
 
+    <!-- Upload step (Step 1) -->
     <div class="upload-block active" id="uploadBlock"></div>
+
+    <!-- Results from server (volume + price) -->
     <div id="resultsContainer"></div>
     <div id="totalPrice" class="total"></div>
 
+    <!-- Review summary (Step 2)-->
     <div class="summary-block" id="summaryBlock">
       <p>All models uploaded. You can review or go back.</p>
     </div>
 
+    <!-- New Confirmation Step (Step 3) -->
+    <div class="confirmation-block" id="confirmationBlock">
+     <p>Please confirm your order before final submission.</p>
+    </div>
+
+    <!-- Done screen (Step 4)-->
     <div class="done-block" id="doneBlock">
       <p>Process finished. Thank you!</p>
     </div>
 
+    <!-- Navigation buttons -->
     <div id="stepControls">
       <button class="step-button" onclick="goBack()" id="backBtn" style="display:none">Back</button>
       <button class="step-button" onclick="goNext()" id="nextBtn">Next</button>
@@ -142,8 +159,12 @@
     </div>
   </div>
 
+  <!-- JavaScript Functionality -->
   <script>
+    // Constants
     const MAX_FILES = 3;
+
+    // DOM references
     const uploadBlock = document.getElementById('uploadBlock');
     const resultsContainer = document.getElementById('resultsContainer');
     const totalPriceDisplay = document.getElementById('totalPrice');
@@ -154,18 +175,23 @@
     const backBtn = document.getElementById('backBtn');
     const startOverBtn = document.getElementById('startOverBtn');
 
+    // State variables
     let totalPrice = 0;
     let currentStep = 1;
     let uploadedModels = [];
 
+    // Creates an upload row (file input + upload button)
     function createUploadRow(index) {
       const row = document.createElement('div');
       row.className = 'upload-row';
+
+      // HTML content inside upload row
       row.innerHTML = `
         <input type="file" id="file${index}" accept=".stl,.step,.stp">
         <button class="upload-btn" onclick="uploadFile(${index})">Upload</button>
       `;
 
+      // Progress text placeholder
       const progress = document.createElement('div');
       progress.id = `progress${index}`;
       progress.className = 'progress-text';
@@ -174,10 +200,12 @@
       uploadBlock.appendChild(progress);
     }
 
+    // Create multiple upload rows (based on MAX_FILES)
     for (let i = 0; i < MAX_FILES; i++) {
       createUploadRow(i);
     }
 
+    // Handle file upload for given index
     function uploadFile(index) {
       const fileInput = document.getElementById(`file${index}`);
       const progressText = document.getElementById(`progress${index}`);
@@ -196,12 +224,14 @@
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/upload", true);
 
+      // Spinner while uploading
       const spinner = document.createElement('span');
       spinner.className = 'spinner';
       progressText.appendChild(spinner);
       const percentText = document.createTextNode(' 0%');
       progressText.appendChild(percentText);
 
+      // Show upload progress %
       xhr.upload.onprogress = function(event) {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
@@ -212,11 +242,12 @@
         }
       };
 
+      // After upload finishes
       xhr.onload = function() {
         progressText.innerHTML = '';
         if (xhr.status === 200) {
           try {
-            const data = JSON.parse(xhr.responseText);
+            const data = JSON.parse(xhr.responseText); // Get JSON from server
             const volume = data.volume.toFixed(2);
             const price = data.price.toFixed(2);
 
@@ -225,103 +256,123 @@
             resultDiv.innerHTML = `Model ${index + 1}: Volume: ${volume} cm³, Price: $${price}`;
             resultsContainer.appendChild(resultDiv);
 
-uploadedModels.push({
-  index,
-  volume,
-  pricePerUnit: parseFloat(price),
-  quantity: 1 // default 1 piece
-});
+            // Save to our state array
+            uploadedModels.push({
+              index,
+              volume,
+              pricePerUnit: parseFloat(price),
+              quantity: 1
+            });
 
-renderSummary();
+            renderSummary();
 
           } catch (e) {
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'result';
-            resultDiv.innerHTML = `<span style="color:red">Invalid JSON response</span>`;
-            resultsContainer.appendChild(resultDiv);
-            console.error("Failed to parse JSON:", xhr.responseText);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'result';
+            errorDiv.innerHTML = `<span style="color:red">Invalid JSON response</span>`;
+            resultsContainer.appendChild(errorDiv);
+            console.error("JSON parse failed:", xhr.responseText);
           }
         } else {
-          const resultDiv = document.createElement('div');
-          resultDiv.className = 'result';
-          resultDiv.innerHTML = `<span style="color:red">Error: ${xhr.responseText}</span>`;
-          resultsContainer.appendChild(resultDiv);
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'result';
+          errorDiv.innerHTML = `<span style="color:red">Error: ${xhr.responseText}</span>`;
+          resultsContainer.appendChild(errorDiv);
         }
       };
 
       xhr.onerror = function() {
         progressText.innerHTML = '';
-        const resultDiv = document.createElement('div');
-        resultDiv.className = 'result';
-        resultDiv.innerHTML = '<span style="color:red">Upload error</span>';
-        resultsContainer.appendChild(resultDiv);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'result';
+        errorDiv.innerHTML = '<span style="color:red">Upload error</span>';
+        resultsContainer.appendChild(errorDiv);
       };
 
       xhr.send(formData);
     }
 
-function renderSummary() {
-  summaryBlock.innerHTML = '<p>All models uploaded. You can review quantities below.</p>';
+    // Show uploaded models with quantity inputs
+    function renderSummary() {
+      summaryBlock.innerHTML = '<p>All models uploaded. You can review quantities below.</p>';
 
-  uploadedModels.forEach((model, i) => {
-    const row = document.createElement('div');
-    row.className = 'upload-row';
-    row.innerHTML = `
-      <span>Model ${i + 1}: Volume: ${model.volume} cm³, Unit Price: $${model.pricePerUnit}</span>
-      <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
-    `;
-    summaryBlock.appendChild(row);
-  });
+      uploadedModels.forEach((model, i) => {
+        const row = document.createElement('div');
+        row.className = 'upload-row';
+        row.innerHTML = `
+          <span>Model ${i + 1}: Volume: ${model.volume} cm³, Unit Price: $${model.pricePerUnit}</span>
+          <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
+        `;
+        summaryBlock.appendChild(row);
+      });
 
-  updateTotal();
+      updateTotal();
+    }
+
+    // Go to next step (summary or done)
+function goNext() {
+  if (currentStep === 1) {
+    // From Upload → Summary
+    uploadBlock.classList.remove('active');
+    summaryBlock.classList.add('active');
+    stepTitle.textContent = "Summary";
+    backBtn.style.display = 'inline-block';
+    currentStep++;
+  } else if (currentStep === 2) {
+    // From Summary → Confirmation
+    summaryBlock.classList.remove('active');
+    confirmationBlock.classList.add('active');
+    stepTitle.textContent = "Confirm";
+    currentStep++;
+  } else if (currentStep === 3) {
+    // From Confirmation → Done
+    confirmationBlock.classList.remove('active');
+    doneBlock.classList.add('active');
+    stepTitle.textContent = "Done";
+    nextBtn.style.display = 'none';
+    backBtn.style.display = 'none';
+    startOverBtn.style.display = 'inline-block';
+    currentStep++;
+  }
 }
 
-    function goNext() {
-      if (currentStep === 1) {
-        uploadBlock.classList.remove('active');
-        summaryBlock.classList.add('active');
-        stepTitle.textContent = "Summary";
-        backBtn.style.display = 'inline-block';
-        currentStep++;
-      } else if (currentStep === 2) {
-        summaryBlock.classList.remove('active');
-        doneBlock.classList.add('active');
-        stepTitle.textContent = "Done";
-        nextBtn.style.display = 'none';
-        backBtn.style.display = 'none';
-        startOverBtn.style.display = 'inline-block';
-        currentStep++;
-      }
-    }
+    // Go back to upload step
+function goBack() {
+  if (currentStep === 2) {
+    // Back to Upload
+    summaryBlock.classList.remove('active');
+    uploadBlock.classList.add('active');
+    stepTitle.textContent = "Upload 3D Model";
+    backBtn.style.display = 'none';
+    currentStep--;
+  } else if (currentStep === 3) {
+    // Back to Summary
+    confirmationBlock.classList.remove('active');
+    summaryBlock.classList.add('active');
+    stepTitle.textContent = "Summary";
+    currentStep--;
+  }
+}
 
-    function goBack() {
-      if (currentStep === 2) {
-        summaryBlock.classList.remove('active');
-        uploadBlock.classList.add('active');
-        stepTitle.textContent = "Upload 3D Model";
-        backBtn.style.display = 'none';
-        currentStep--;
-      }
-    }
-
+    // Reload page to restart
     function startOver() {
       location.reload();
     }
 
-function updateQuantity(index, value) {
-  const qty = parseInt(value);
-  uploadedModels[index].quantity = isNaN(qty) || qty < 1 ? 1 : qty;
-  updateTotal();
-}
+    // Update quantity for a model and recalculate total
+    function updateQuantity(index, value) {
+      const qty = parseInt(value);
+      uploadedModels[index].quantity = isNaN(qty) || qty < 1 ? 1 : qty;
+      updateTotal();
+    }
 
-function updateTotal() {
-  totalPrice = uploadedModels.reduce((sum, model) => {
-    return sum + model.quantity * model.pricePerUnit;
-  }, 0);
-
-  totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
-}
-
+    // Calculate total price based on all uploaded models
+    function updateTotal() {
+      totalPrice = uploadedModels.reduce((sum, model) => {
+        return sum + model.quantity * model.pricePerUnit;
+      }, 0);
+      totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
+    }
   </script>
 </body>
 </html>
