@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Upload 3D Models</title>
+  <title>Online kalkulačka</title>
 
   <!-- Import Montserrat font from Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
@@ -139,7 +139,7 @@
 <body>
   <div class="container">
     <!-- Page title -->
-    <h2 id="stepTitle">Nahrajte si jeden nebo více 3D Modelů</h2>
+    <h2 id="stepTitle">Nahrajte jeden nebo více 3D modelů</h2>
 
     <!-- Upload step (Step 1) -->
     <div class="upload-block active" id="uploadBlock"></div>
@@ -198,11 +198,11 @@
       const row = document.createElement('div');
       row.className = 'upload-row';
 
-      // HTML content inside upload row
+      // HTML content inside upload row - Vybrat soubor
       row.innerHTML = `
       <span>${index + 1}.</span>
       <input type="file" id="file${index}" accept=".stl,.step,.stp">
-      <button class="upload-btn" onclick="uploadFile(${index})">Vybrat soubor</button>
+      <button class="upload-btn" onclick="uploadFile(${index})">Nahrát</button>
     `;
 
       // Progress text placeholder
