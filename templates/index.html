@@ -236,7 +236,7 @@
 
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
-            resultDiv.innerHTML = `Model ${index + 1}: Price: ${price} Kč`;
+            resultDiv.innerHTML = `Model ${index + 1}: Cena: ${price} Kč`;
             resultsContainer.appendChild(resultDiv);
 
             uploadedModels.push({
@@ -283,7 +283,7 @@
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
           <span>
-            Model ${i + 1}: Cena za kus: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
+            Model ${i + 1}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
           </span>
           <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
         `;
@@ -306,7 +306,7 @@
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
           <span>
-            Model ${i + 1}: Cena za kus: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
+            Model ${i + 1}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
           </span>
         `;
         confirmationBlock.appendChild(row);
