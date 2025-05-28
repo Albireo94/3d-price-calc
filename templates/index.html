@@ -142,11 +142,11 @@
     </div>
 
     <div class="confirmation-block" id="confirmationBlock">
-      <p>Please confirm your order before final submission.</p>
+      <p>Potvrďte prosím správnost údajů.</p>
     </div>
 
     <div class="done-block" id="doneBlock">
-      <p>Process finished. Thank you!</p>
+      <p>Poptávka byla odeslána!</p>
     </div>
 
     <div id="stepControls">
@@ -299,7 +299,7 @@
     }
 
     function renderConfirmation() {
-      confirmationBlock.innerHTML = '<p>Please confirm your models below:</p>';
+      confirmationBlock.innerHTML = '<p>Potvrďte prosím správnost údajů:</p>';
       uploadedModels.forEach((model, i) => {
         const row = document.createElement('div');
         row.className = 'upload-row';
