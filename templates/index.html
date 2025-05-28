@@ -268,7 +268,7 @@
 
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
-            resultDiv.innerHTML = `Model ${index + 1}: Volume: ${volume} cm³, Price: $${price}`;
+            resultDiv.innerHTML = `Model ${index + 1}: Price: ${price} Kč`;
             resultsContainer.appendChild(resultDiv);
 
             // Save to our state array
@@ -319,8 +319,7 @@
         row.innerHTML = `
        <span>
          Model ${i + 1}: 
-         Volume: ${model.volume} cm³ × ${model.quantity} = <strong>${totalVol} cm³</strong>, 
-         Unit Price: $${model.pricePerUnit} × ${model.quantity} = <strong>$${totalCost}</strong>
+         Unit Price: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>$${totalCost}</strong>
        </span>
        <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
     `;
@@ -352,8 +351,7 @@
         row.innerHTML = `
       <span>
         Model ${i + 1}: 
-        Volume: ${model.volume} cm³ × ${model.quantity} = <strong>${totalVol} cm³</strong>, 
-        Unit Price: $${model.pricePerUnit} × ${model.quantity} = <strong>$${totalCost}</strong>
+        Unit Price: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
       </span>
      `;
 
@@ -424,7 +422,8 @@
       totalPrice = uploadedModels.reduce((sum, model) => {
         return sum + model.quantity * model.pricePerUnit;
       }, 0);
-      totalPriceDisplay.innerHTML = `Total Price: $${totalPrice.toFixed(2)}`;
+      totalPriceDisplay.innerHTML = `Celková cena: ${totalPrice.toFixed(2)} Kč`;
+
     }
   </script>
 </body>
