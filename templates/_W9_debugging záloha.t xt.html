@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online kalkulačka</title>
+
+    <!-- Import Montserrat font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Styles -->
+    <style>
+        /* Basic styles for body layout */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            padding: 60px 0 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 80vh;
+        }
+
+        /* Center container box */
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        /* Heading style */
+        h2 {
+            margin-bottom: 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 20 px;
+        }
+
+        /* Hide blocks by default, only show with .active class */
+        .upload-block,
+        .summary-block,
+        .confirmation-block,
+        .done-block {
+            display: none;
+        }
+
+        .upload-block.active,
+        .summary-block.active,
+        .confirmation-block.active,
+        .done-block.active {
+            display: block;
+        }
+
+        /* Row style for file upload area */
+        .upload-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Upload button style */
+        button.upload-btn {
+            background-color: #fff000;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        button:hover {
+            background-color: black;
+            color: white;
+        }
+
+        /* Spinner animation shown while uploading */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Display of progress text */
+        .progress-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .result {
+            margin: 4px 0 10px;
+            font-weight: bold;
+        }
+
+        .total {
+            margin-top: 12px;
+            font-weight: bold;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .step-button {
+            margin: 20px 5px 5px;
+            padding: 10px 20px;
+            background-color: #fff000;
+            color: black;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Page title -->
+        <h2 id="stepTitle">Nahrajte 3D modely</h2>
+
+        <!-- Upload step (Step 1) -->
+        <div class="upload-block active" id="uploadBlock"></div>
+
+        <!-- Results from server (volume + price) -->
+        <div id="resultsContainer"></div>
+
+        <!-- Review summary (Step 2)-->
+        <div class="summary-block" id="summaryBlock">
+            <p>Níže můžete upravit množství.</p>
+            <div id="totalPrice" class="total"></div>
+        </div>
+
+        <!-- New Confirmation Step (Step 3) -->
+        <div class="confirmation-block" id="confirmationBlock">
+            <p>Please confirm your order before final submission.</p>
+        </div>
+
+        <!-- Done screen (Step 4)-->
+        <div class="done-block" id="doneBlock">
+            <p>Process finished. Thank you!</p>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div id="stepControls">
+            <button class="step-button" onclick="goBack()" id="backBtn" style="display:none">Zpět</button>
+            <button class="step-button" onclick="goNext()" id="nextBtn">Další</button>
+            <button class="step-button" onclick="startOver()" id="startOverBtn" style="display:none">Zpátky na
+                začátek</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Functionality -->
+    <script>
+        // Constants
+        const MAX_FILES = 3;
+
+        // DOM references
+        const uploadBlock = document.getElementById('uploadBlock');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const totalPriceDisplay = document.getElementById('totalPrice');
+        const stepTitle = document.getElementById('stepTitle');
+        const summaryBlock = document.getElementById('summaryBlock');
+        const doneBlock = document.getElementById('doneBlock');
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const startOverBtn = document.getElementById('startOverBtn');
+
+        // State variables
+        let totalPrice = 0;
+        let currentStep = 1;
+        let uploadedModels = [];
+
+        // Creates an upload row (file input + upload button)
+        function createUploadRow(index) {
+            const row = document.createElement('div');
+            row.className = 'upload-row';
+
+            // HTML content inside upload row - Vybrat soubor
+            row.innerHTML = `
+      <span>${index + 1}.</span>
+      <input type="file" id="file${index}" accept=".stl,.step,.stp">
+      <button class="upload-btn" onclick="uploadFile(${index})">Nahrát</button>
+    `;
+
+            // Progress text placeholder
+            const progress = document.createElement('div');
+            progress.id = `progress${index}`;
+            progress.className = 'progress-text';
+
+            uploadBlock.appendChild(row);
+            uploadBlock.appendChild(progress);
+        }
+
+        // Create multiple upload rows (based on MAX_FILES)
+        for (let i = 0; i < MAX_FILES; i++) {
+            createUploadRow(i);
+        }
+
+        // Handle file upload for given index
+        function uploadFile(index) {
+            const fileInput = document.getElementById(`file${index}`);
+            const progressText = document.getElementById(`progress${index}`);
+
+            if (!fileInput.files.length) {
+                progressText.innerHTML = '<span style="color:red">Select a file first.</span>';
+                return;
+            }
+
+            progressText.innerHTML = '';
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload", true);
+
+            // Spinner while uploading
+            const spinner = document.createElement('span');
+            spinner.className = 'spinner';
+            progressText.appendChild(spinner);
+            const percentText = document.createTextNode(' 0%');
+            progressText.appendChild(percentText);
+
+            // Show upload progress %
+            xhr.upload.onprogress = function (event) {
+                if (event.lengthComputable) {
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    percentText.nodeValue = ` ${percent}%`;
+                    if (percent === 100) {
+                        percentText.nodeValue = ` 100% - Processing...`;
+                    }
+                }
+            };
+
+            // After upload finishes
+            xhr.onload = function () {
+                progressText.innerHTML = '';
+                if (xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText); // Get JSON from server
+                        const volume = data.volume.toFixed(2);
+                        const price = data.price.toFixed(2);
+
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result';
+                        resultDiv.innerHTML = `Model ${index + 1}: Price: ${price} Kč`;
+                        resultsContainer.appendChild(resultDiv);
+
+                        // Save to our state array
+                        uploadedModels.push({
+                            index,
+                            volume,
+                            pricePerUnit: parseFloat(price),
+                            quantity: 1
+                        });
+
+                        renderSummary();
+
+                    } catch (e) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'result';
+                        errorDiv.innerHTML = `<span style="color:red">Invalid JSON response</span>`;
+                        resultsContainer.appendChild(errorDiv);
+                        console.error("JSON parse failed:", xhr.responseText);
+                    }
+                } else {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'result';
+                    errorDiv.innerHTML = `<span style="color:red">Error: ${xhr.responseText}</span>`;
+                    resultsContainer.appendChild(errorDiv);
+                }
+            };
+
+            xhr.onerror = function () {
+                progressText.innerHTML = '';
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'result';
+                errorDiv.innerHTML = '<span style="color:red">Upload error</span>';
+                resultsContainer.appendChild(errorDiv);
+            };
+
+            xhr.send(formData);
+        }
+
+        // Show uploaded models with quantity inputs
+        function renderSummary() {
+            summaryBlock.innerHTML = '<p>Níže můžete upravit množství.</p>';
+
+            uploadedModels.forEach((model, i) => {
+                const row = document.createElement('div');
+                row.className = 'upload-row';
+                const totalVol = (model.volume * model.quantity).toFixed(2);
+                const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
+                row.innerHTML = `
+       <span>
+         Model ${i + 1}: 
+         Cena za kus: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>$${totalCost}</strong>
+       </span>
+       <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
+    `;
+                summaryBlock.appendChild(row);
+            });
+
+            // Create or re-create totalPrice div
+            const totalDiv = document.createElement('div');
+            totalDiv.id = 'totalPrice';
+            totalDiv.className = 'total';
+            summaryBlock.appendChild(totalDiv);
+
+            updateTotal(); // now it will work
+        }
+
+        updateTotal();
+
+
+        function renderConfirmation() {
+            confirmationBlock.innerHTML = '<p>Please confirm your models below:</p>';
+
+            uploadedModels.forEach((model, i) => {
+                const row = document.createElement('div');
+                row.className = 'upload-row';
+
+                const totalVol = (model.volume * model.quantity).toFixed(2);
+                const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
+
+                row.innerHTML = `
+      <span>
+        Model ${i + 1}: 
+        Cena za kus: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
+      </span>
+     `;
+
+                confirmationBlock.appendChild(row);
+            });
+
+            updateTotal(); // reuse this to display total price
+        }
+        // Go to next step
+        function goNext() {
+            if (currentStep === 1) {
+                // From Upload → Summary
+                uploadBlock.classList.remove('active');
+                summaryBlock.classList.add('active');
+                stepTitle.textContent = "Souhrn";
+                backBtn.style.display = 'inline-block';
+                currentStep++;
+            } else if (currentStep === 2) {
+                summaryBlock.classList.remove('active');
+                confirmationBlock.classList.add('active');
+                stepTitle.textContent = "Potvrzení";
+                renderConfirmation(); // ← add this line
+                currentStep++;
+            } else if (currentStep === 3) {
+                // From Confirmation → Done
+                confirmationBlock.classList.remove('active');
+                doneBlock.classList.add('active');
+                stepTitle.textContent = "Hotovo";
+                nextBtn.style.display = 'none';
+                backBtn.style.display = 'none';
+                startOverBtn.style.display = 'inline-block';
+                currentStep++;
+            }
+        }
+
+        // Go back to the last step
+        function goBack() {
+            if (currentStep === 2) {
+                // Back to Upload
+                summaryBlock.classList.remove('active');
+                uploadBlock.classList.add('active');
+                stepTitle.textContent = "Nahrajte 3D modely";
+                backBtn.style.display = 'none';
+                currentStep--;
+            } else if (currentStep === 3) {
+                // Back to Summary
+                confirmationBlock.classList.remove('active');
+                summaryBlock.classList.add('active');
+                stepTitle.textContent = "Souhrn";
+                currentStep--;
+            }
+        }
+
+        // Reload page to restart
+        function startOver() {
+            location.reload();
+        }
+
+        // Update quantity for a model and recalculate total
+        function updateQuantity(index, value) {
+            const qty = parseInt(value);
+            uploadedModels[index].quantity = isNaN(qty) || qty < 1 ? 1 : qty;
+            updateTotal();
+        }
+
+        // Calculate total price based on all uploaded models
+        function updateTotal() {
+            totalPrice = uploadedModels.reduce((sum, model) => {
+                return sum + model.quantity * model.pricePerUnit;
+            }, 0);
+            totalPriceDisplay.innerHTML = `Celková cena: ${totalPrice.toFixed(2)} Kč`;
+
+        }
+    </script>
+</body>
+
+</html>
