@@ -198,7 +198,7 @@
       const progressText = document.getElementById(`progress${index}`);
 
       if (!fileInput.files.length) {
-        progressText.innerHTML = '<span style="color:red">Select a file first.</span>';
+        progressText.innerHTML = '<span style="color:red">Nejprve vyberte soubor.</span>';
         return;
       }
 
@@ -236,12 +236,13 @@
 
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
-            resultDiv.innerHTML = `Model ${index + 1}: Cena: ${price} Kč`;
+            resultDiv.innerHTML = `${file.name}: Cena: ${price} Kč`;
             resultsContainer.appendChild(resultDiv);
 
             uploadedModels.push({
               index,
               volume,
+              filename: file.name,
               pricePerUnit: parseFloat(price),
               quantity: 1
             });
@@ -283,8 +284,9 @@
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
           <span>
-            Model ${i + 1}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
+           ${model.filename}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
           </span>
+
           <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
         `;
         summaryBlock.appendChild(row);
@@ -306,7 +308,7 @@
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
           <span>
-            Model ${i + 1}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
+           ${model.filename}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
           </span>
         `;
         confirmationBlock.appendChild(row);
