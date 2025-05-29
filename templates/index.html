@@ -149,6 +149,7 @@
 
     <div class="upload-block active" id="uploadBlock"></div>
     <div id="resultsContainer"></div>
+    <hr id="uploadDivider" style="border: 1px solid #ccc; margin: 20px 0;">
 
     <div class="summary-block" id="summaryBlock">
       <p>Níže můžete upravit množství.</p>
@@ -275,7 +276,14 @@
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
             const shortName = shortenFileName(file.name);
-            resultDiv.innerHTML = `${shortName}: Cena: ${price} Kč`;
+
+            resultDiv.innerHTML = `
+             <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>${shortName}</span>
+              <span style="font-weight: bold;">${price} Kč</span>
+             </div>
+            `;
+
             resultsContainer.appendChild(resultDiv);
 
             uploadedModels.push({
