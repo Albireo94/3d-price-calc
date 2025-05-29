@@ -27,7 +27,7 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      width: 400 px;
+      width: 400px;
       text-align: center;
     }
 
@@ -338,10 +338,11 @@
         row.className = 'upload-row';
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
-         <span>${shortenFileName(model.filename)}</span>
+         <span id="modelLine${i}">
+            ${shortenFileName(model.filename)}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
+         </span>
          <input type="number" min="1" value="${model.quantity}" oninput="updateQuantity(${i}, this.value)" style="width: 60px;">
         `;
-
         summaryBlock.appendChild(row);
       });
 
