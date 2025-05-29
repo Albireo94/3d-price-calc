@@ -62,7 +62,7 @@
     button.upload-btn {
       background-color: #fff000;
       border: none;
-      padding: 8px 15px;
+      padding: 10px 15px;
       border-radius: 20px;
       cursor: pointer;
       font-weight: 525;
@@ -71,7 +71,7 @@
 
     .step-button {
       margin: 20px 5px 5px;
-      padding: 8px 20px;
+      padding: 10px 20px;
       background-color: #fff000;
       color: black;
       border: none;
@@ -283,11 +283,10 @@
         row.className = 'upload-row';
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
-          <span>
-           ${model.filename}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
-          </span>
-
-          <input type="number" min="1" value="${model.quantity}" onchange="updateQuantity(${i}, this.value)" style="width: 60px;">
+         <span id="modelLine${i}">
+            ${model.filename}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
+         </span>
+         <input type="number" min="1" value="${model.quantity}" oninput="updateQuantity(${i}, this.value)" style="width: 60px;">
         `;
         summaryBlock.appendChild(row);
       });
@@ -363,6 +362,15 @@
     function updateQuantity(index, value) {
       const qty = parseInt(value);
       uploadedModels[index].quantity = isNaN(qty) || qty < 1 ? 1 : qty;
+
+      // Update the price line dynamically
+      const model = uploadedModels[index];
+      const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
+      const line = document.getElementById(`modelLine${index}`);
+      if (line) {
+        line.innerHTML = `${model.filename}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>`;
+      }
+
       updateTotal();
     }
 
