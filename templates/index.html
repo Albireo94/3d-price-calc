@@ -331,18 +331,17 @@
     }
 
     function renderSummary() {
-      summaryBlock.innerHTML = '<p>Níže můžete upravit množství.</p>';
+      summaryBlock.innerHTML = '';
 
       uploadedModels.forEach((model, i) => {
         const row = document.createElement('div');
         row.className = 'upload-row';
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
-         <span id="modelLine${i}">
-            ${shortenFileName(model.filename)}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
-         </span>
+         <span>${shortenFileName(model.filename)}</span>
          <input type="number" min="1" value="${model.quantity}" oninput="updateQuantity(${i}, this.value)" style="width: 60px;">
         `;
+
         summaryBlock.appendChild(row);
       });
 
