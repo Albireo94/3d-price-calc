@@ -204,6 +204,14 @@
 
       progressText.innerHTML = '';
       const file = fileInput.files[0];
+
+      // ✅ Check for duplicate filenames BEFORE uploading
+      const isDuplicate = uploadedModels.some(model => model.filename === file.name);
+      if (isDuplicate) {
+        progressText.innerHTML = `<span style="color:red">Soubor "${file.name}" byl již nahrán.</span>`;
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
 
@@ -240,8 +248,6 @@
             resultsContainer.appendChild(resultDiv);
 
             uploadedModels.push({
-              index,
-              volume,
               filename: file.name,
               pricePerUnit: parseFloat(price),
               quantity: 1
@@ -274,6 +280,7 @@
 
       xhr.send(formData);
     }
+
 
     function renderSummary() {
       summaryBlock.innerHTML = '<p>Níže můžete upravit množství.</p>';
