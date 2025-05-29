@@ -146,6 +146,29 @@
       border-top: 1px solid #ccc;
       padding-top: 10px;
     }
+
+    /* make each row a 4-column grid: label | quantity | “=” + total | delete button */
+    .summary-block .upload-row {
+      display: grid;
+      grid-template-columns: 1fr 60px auto 32px;
+      column-gap: 8px;
+      align-items: center;
+    }
+
+    /* center the number in its cell */
+    .summary-block .qty-input {
+      width: 100%;
+      text-align: center;
+    }
+
+    /* optional: tighten up the delete button */
+    .summary-block .remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1em;
+      line-height: 1;
+    }
   </style>
 </head>
 
