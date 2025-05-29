@@ -338,9 +338,9 @@
         row.className = 'upload-row';
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
         row.innerHTML = `
-          <span id="modelLine${i}">
-             ${shortenFileName(model.filename)} – ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
-          </span>
+      <span id="modelLine${i}">
+        ${shortenFileName(model.filename)}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
+      </span>
       <input type="number" min="1" value="${model.quantity}" oninput="updateQuantity(${i}, this.value)" style="width: 60px;">
       <button onclick="removeModel(${i})" style="margin-left: 10px;">🗑️</button>
     `;
