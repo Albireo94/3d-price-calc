@@ -331,28 +331,34 @@
     }
 
     function renderSummary() {
-      // header text
-      summaryBlock.innerHTML = '<p>Níže můžete upravit množství nebo odstranit soubor.</p>';
+      summaryBlock.innerHTML = '';
 
-      // for each model, render *one* row: filename – unit × qty = total + delete button
       uploadedModels.forEach((model, i) => {
         const row = document.createElement('div');
         row.className = 'upload-row';
 
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
-        row.innerHTML = `
-      <span id="modelLine${i}">
-        ${shortenFileName(model.filename)} – ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>
-      </span>
-      <input type="number" min="1" value="${model.quantity}"
-             oninput="updateQuantity(${i}, this.value)" style="width: 60px;">
-      <button onclick="removeModel(${i})" style="margin-left: 10px;">🗑️</button>
-    `;
+        const shortName = shortenFileName(model.filename);
 
+        row.innerHTML = `
+      <span class="label">
+        ${shortName}: ${model.pricePerUnit} Kč ×
+      </span>
+      <input
+        type="number"
+        min="1"
+        value="${model.quantity}"
+        oninput="updateQuantity(${i}, this.value)"
+        class="qty-input"
+      />
+      <span class="equals">
+        = <strong>${totalCost} Kč</strong>
+      </span>
+      <button class="remove-btn" onclick="removeModel(${i})">🗑️</button>
+    `;
         summaryBlock.appendChild(row);
       });
 
-      // update the final total price below
       updateTotal();
     }
 
