@@ -202,7 +202,6 @@
         return;
       }
 
-      progressText.innerHTML = '';
       const file = fileInput.files[0];
 
       // ✅ Check for duplicate filenames BEFORE uploading
@@ -212,6 +211,7 @@
         return;
       }
 
+      progressText.innerHTML = '';
       const formData = new FormData();
       formData.append('file', file);
 
@@ -253,6 +253,10 @@
               quantity: 1
             });
 
+            // ✅ Disable input and button after upload
+            fileInput.disabled = true;
+            document.querySelectorAll('.upload-btn')[index].disabled = true;
+
             renderSummary();
 
           } catch (e) {
@@ -280,6 +284,7 @@
 
       xhr.send(formData);
     }
+
 
 
     function renderSummary() {
