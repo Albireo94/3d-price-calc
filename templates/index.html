@@ -56,7 +56,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 75px;
     }
 
     button.upload-btn {
@@ -244,7 +244,8 @@
 
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
-            resultDiv.innerHTML = `${file.name}: Cena: ${price} Kč`;
+            const shortName = shortenFileName(file.name);
+            resultDiv.innerHTML = `${shortName}: Cena: ${price} Kč`;
             resultsContainer.appendChild(resultDiv);
 
             uploadedModels.push({
@@ -396,6 +397,23 @@
         totalPriceDisplay.innerHTML = `Celková cena: ${totalPrice.toFixed(2)} Kč`;
       }
     }
+
+    function shortenFileName(filename, maxLength = 25) {
+      const dotIndex = filename.lastIndexOf(".");
+      if (dotIndex === -1) return filename;
+
+      const name = filename.substring(0, dotIndex);
+      const ext = filename.substring(dotIndex); // includes the "."
+
+      if (filename.length <= maxLength) {
+        return filename;
+      }
+
+      const keepLength = maxLength - 3 - ext.length; // 3 for "..."
+      const shortened = name.substring(0, keepLength) + "..." + ext;
+      return shortened;
+    }
+
   </script>
 </body>
 
