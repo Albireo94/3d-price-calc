@@ -75,7 +75,7 @@
     .step-button {
       background: #fff000;
       border: none;
-      padding: 10px 10px;
+      padding: 10px 20px;
       border-radius: 20px;
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
@@ -99,7 +99,7 @@
 
     /* add spacing in summary/confirmation steps */
     .container.wide .step-button {
-      margin: 20px 15px;
+      margin: 20px 8px;
       /* vertical + horizontal space */
     }
 
@@ -226,13 +226,11 @@
 
     .summary-block .qty,
     .confirmation-block .qty {
-      /* ensure the qty cell aligns itself in the middle of the grid row */
-      align-self: center;
-    }
-
-    /* (Optional) if you still see odd line-height, force the span to behave like a block) */
-    .confirmation-block .qty {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* remove any fixed height so it sizes to the grid row */
+      height: auto !important;
     }
   </style>
 </head>
