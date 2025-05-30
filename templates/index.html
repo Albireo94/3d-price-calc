@@ -51,14 +51,6 @@
       display: block;
     }
 
-    .upload-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
     button.upload-btn {
       background-color: #fff000;
       border: none;
@@ -173,8 +165,9 @@
     /* ---- 4-column grid: filename | unit-price | × + qty | =total + delete ---- */
     .summary-block .upload-row {
       display: grid;
-      grid-template-columns: 1fr
-        /* filename */
+      grid-template-columns:
+        1fr
+        /* filename (flexible) */
         auto
         /* unit price */
         auto
@@ -182,29 +175,29 @@
         60px
         /* qty input */
         auto
-        /* =total */
+        /* = */
+        auto
+        /* line total */
         32px
-        /* delete btn */
+        /* delete button */
       ;
       column-gap: 8px;
       align-items: center;
+      margin-bottom: 12px;
     }
 
-    /* truncate filename with “…” if too long */
-    .summary-block .label {
+    .summary-block .name {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    /* center numeric input */
-    .summary-block .qty-input {
+    .summary-block .qty {
       width: 100%;
       text-align: center;
     }
 
-    /* tighten delete button */
-    .summary-block .remove-btn {
+    .summary-block .remove {
       background: none;
       border: none;
       cursor: pointer;
