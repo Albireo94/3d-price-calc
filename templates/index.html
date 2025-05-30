@@ -354,8 +354,15 @@
     }
 
     function renderSummary() {
-      summaryBlock.innerHTML = '';
+      // 1) Clear and re-inject header + total placeholder
+      summaryBlock.innerHTML = `
+    <div id="totalPrice" class="total"></div>
+  `;
 
+      // 2) Grab that placeholder
+      const totalDiv = document.getElementById('totalPrice');
+
+      // 3) For each model, insert exactly one row BEFORE the totalDiv
       uploadedModels.forEach((model, i) => {
         const row = document.createElement('div');
         row.className = 'upload-row';
@@ -368,20 +375,20 @@
         ${shortName}: ${model.pricePerUnit} Kč ×
       </span>
       <input
-        type="number"
-        min="1"
-        value="${model.quantity}"
+        type="number" min="1" value="${model.quantity}"
         oninput="updateQuantity(${i}, this.value)"
         class="qty-input"
       />
       <span class="equals">
-        = <strong>${totalCost} Kč</strong>
+        = <strong id="lineTotal${i}">${totalCost} Kč</strong>
       </span>
       <button class="remove-btn" onclick="removeModel(${i})">🗑️</button>
     `;
-        summaryBlock.appendChild(row);
+
+        summaryBlock.insertBefore(row, totalDiv);
       });
 
+      // 4) Finally, compute & display the grand total
       updateTotal();
     }
 
@@ -405,6 +412,7 @@
 
     function goNext() {
       if (currentStep === 1) {
+        document.getElementById('resultsContainer').style.display = 'none';
         uploadBlock.classList.remove('active');
         summaryBlock.classList.add('active');
         stepTitle.textContent = "Zadejte množství";
@@ -429,6 +437,7 @@
 
     function goBack() {
       if (currentStep === 2) {
+        document.getElementById('resultsContainer').style.display = 'block';
         summaryBlock.classList.remove('active');
         uploadBlock.classList.add('active');
         stepTitle.textContent = "Nahrajte 3D modely";
@@ -447,19 +456,17 @@
     }
 
     function updateQuantity(index, value) {
-      const qty = parseInt(value);
-      uploadedModels[index].quantity = isNaN(qty) || qty < 1 ? 1 : qty;
+      const qty = parseInt(value) || 1;
+      uploadedModels[index].quantity = qty;
 
-      // Update the price line dynamically
-      const model = uploadedModels[index];
-      const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
-      const line = document.getElementById(`modelLine${index}`);
-      if (line) {
-        line.innerHTML = `${shortenFileName(model.filename)}: ${model.pricePerUnit} Kč × ${model.quantity} = <strong>${totalCost} Kč</strong>`;
-      }
+      // update that line’s total
+      const lineTotal = (uploadedModels[index].pricePerUnit * qty).toFixed(2);
+      document.getElementById(`lineTotal${index}`).textContent = `${lineTotal} Kč`;
 
+      // then update the grand total
       updateTotal();
     }
+
 
     function updateTotal() {
       totalPrice = uploadedModels.reduce((sum, model) => {
