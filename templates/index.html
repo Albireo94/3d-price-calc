@@ -75,7 +75,7 @@
     .step-button {
       background: #fff000;
       border: none;
-      padding: 10px 20px;
+      padding: 10px 10px;
       border-radius: 20px;
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
@@ -222,6 +222,17 @@
 
     .confirmation-block .remove {
       display: none;
+    }
+
+    .summary-block .qty,
+    .confirmation-block .qty {
+      /* ensure the qty cell aligns itself in the middle of the grid row */
+      align-self: center;
+    }
+
+    /* (Optional) if you still see odd line-height, force the span to behave like a block) */
+    .confirmation-block .qty {
+      display: block;
     }
   </style>
 </head>
