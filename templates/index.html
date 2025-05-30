@@ -133,60 +133,65 @@
       padding-top: 10px;
     }
 
-    /* ==== SUMMARY GRID ====
-         Seven columns: name | unit | × | qty | = | line-total | trash */
+    /* ==== SUMMARY GRID ==== */
     .summary-block .upload-row {
       display: grid;
       grid-template-columns:
         1fr
-        /* filename, flexible */
-        minmax(60px, max-content)
+        /* filename (flex) */
+        auto
         /* unit price */
         auto
         /* “×” */
         80px
-        /* qty input */
+        /* qty input (fixed) */
         auto
         /* “=” */
-        minmax(80px, max-content)
+        auto
         /* line total */
         32px
-        /* delete button */
+        /* delete btn */
       ;
       column-gap: 8px;
       align-items: center;
+      /* vertical centering */
       margin-bottom: 12px;
     }
 
-    /* Prevent wrapping & right-align numerics */
+    /* right-align all numeric/text cells except the filename */
     .summary-block .unit,
     .summary-block .times,
     .summary-block .equals,
     .summary-block .line-total {
-      white-space: nowrap;
       text-align: right;
+      white-space: nowrap;
     }
 
-    /* Truncate long filenames */
+    /* truncate long filenames */
     .summary-block .name {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    /* Center the qty input’s text */
+    /* quantity input — fills the 80px cell, centers its text, and stays vertically centered */
     .summary-block .qty {
       width: 100%;
+      box-sizing: border-box;
       text-align: center;
+      align-self: center;
+      /* optional: fix height if your inputs look too tall */
+      height: 1.8em;
     }
 
-    /* Style delete btn */
+    /* trash button */
     .summary-block .remove {
       background: none;
       border: none;
       cursor: pointer;
       font-size: 1.2em;
       line-height: 1;
+      padding: 0;
     }
   </style>
 </head>
