@@ -169,6 +169,48 @@
       font-size: 1.1em;
       line-height: 1;
     }
+
+    /* ---- 4-column grid: filename | unit-price | × + qty | =total + delete ---- */
+    .summary-block .upload-row {
+      display: grid;
+      grid-template-columns: 1fr
+        /* filename */
+        auto
+        /* unit price */
+        auto
+        /* × */
+        60px
+        /* qty input */
+        auto
+        /* =total */
+        32px
+        /* delete btn */
+      ;
+      column-gap: 8px;
+      align-items: center;
+    }
+
+    /* truncate filename with “…” if too long */
+    .summary-block .label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* center numeric input */
+    .summary-block .qty-input {
+      width: 100%;
+      text-align: center;
+    }
+
+    /* tighten delete button */
+    .summary-block .remove-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2em;
+      line-height: 1;
+    }
   </style>
 </head>
 
@@ -354,44 +396,35 @@
     }
 
     function renderSummary() {
-      // 1) Clear and re-inject header + total placeholder
       summaryBlock.innerHTML = `
+    <p>Níže můžete upravit množství nebo odstranit soubor.</p>
     <div id="totalPrice" class="total"></div>
   `;
-
-      // 2) Grab that placeholder
       const totalDiv = document.getElementById('totalPrice');
 
-      // 3) For each model, insert exactly one row BEFORE the totalDiv
       uploadedModels.forEach((model, i) => {
         const row = document.createElement('div');
         row.className = 'upload-row';
 
+        // force shorter names here:
+        const nameShort = shortenFileName(model.filename, 15);
         const totalCost = (model.pricePerUnit * model.quantity).toFixed(2);
-        const shortName = shortenFileName(model.filename);
 
         row.innerHTML = `
-      <span class="label">
-        ${shortName}: ${model.pricePerUnit} Kč ×
-      </span>
-      <input
-        type="number" min="1" value="${model.quantity}"
+      <span class="label">${nameShort}</span>
+      <span class="unit">${model.pricePerUnit} Kč</span>
+      <span class="times">×</span>
+      <input type="number" min="1" value="${model.quantity}"
         oninput="updateQuantity(${i}, this.value)"
-        class="qty-input"
-      />
-      <span class="equals">
-        = <strong id="lineTotal${i}">${totalCost} Kč</strong>
-      </span>
+        class="qty-input"/>
+      <span class="equals">= <strong>${totalCost} Kč</strong></span>
       <button class="remove-btn" onclick="removeModel(${i})">🗑️</button>
     `;
-
         summaryBlock.insertBefore(row, totalDiv);
       });
 
-      // 4) Finally, compute & display the grand total
       updateTotal();
     }
-
 
     function renderConfirmation() {
       confirmationBlock.innerHTML = '<p>Potvrďte prosím správnost údajů:</p>';
