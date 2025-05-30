@@ -203,11 +203,20 @@
 
         .summary-block .qty,
         .confirmation-block .qty {
-            justify-self: center;
+            justify-self: start;
+            /* Align cell content to the left in the grid */
+            display: flex;
+            /* Ensure vertical centering */
+            align-items: center;
+            /* Vertically center the number */
+            text-align: left;
+            /* Align number content to the left */
             width: 100%;
+            /* Full width of the cell */
             box-sizing: border-box;
-            text-align: center;
-            height: 1.8em;
+            /* Prevent overflow */
+            height: auto;
+            /* Let it grow naturally */
         }
 
         .summary-block .remove {
@@ -222,15 +231,6 @@
 
         .confirmation-block .remove {
             display: none;
-        }
-
-        .summary-block .qty,
-        .confirmation-block .qty {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* remove any fixed height so it sizes to the grid row */
-            height: auto !important;
         }
     </style>
 </head>

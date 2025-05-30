@@ -232,16 +232,6 @@
     .confirmation-block .remove {
       display: none;
     }
-
-    #dropZone {
-      transition: background 0.3s;
-      text-align: center;
-      background-color: #f9f9f9;
-    }
-
-    #dropZone.dragover {
-      background-color: #e0f7fa;
-    }
   </style>
 </head>
 
@@ -249,14 +239,7 @@
   <div class="container">
     <h2 id="stepTitle">Nahrajte 3D modely</h2>
 
-    <div class="upload-block active" id="uploadBlock">
-      <div id="dropZone" style="border: 2px dashed #ccc; border-radius: 8px; padding: 30px; cursor: pointer;">
-        <p style="margin: 0;">Přetáhněte soubory sem nebo klikněte pro výběr</p>
-        <input type="file" id="fileInput" accept=".stl,.step,.stp" multiple style="display: none;">
-      </div>
-      <div id="progressArea"></div>
-    </div>
-
+    <div class="upload-block active" id="uploadBlock"></div>
     <hr class="divider">
     <div id="resultsContainer"></div>
 
@@ -296,46 +279,6 @@
     let currentStep = 1;
     let uploadedModels = [];
 
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const progressArea = document.getElementById('progressArea');
-
-    dropZone.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      handleFiles(e.dataTransfer.files);
-    });
-
-    fileInput.addEventListener('change', () => {
-      handleFiles(fileInput.files);
-    });
-
-    function handleFiles(files) {
-      [...files].forEach(file => {
-        if (!file.name.match(/\.(stl|step|stp)$/i)) {
-          return alert("Neplatný typ souboru: " + file.name);
-        }
-
-        // prevent duplicate names
-        if (uploadedModels.some(m => m.filename === file.name)) {
-          return alert("Soubor už byl nahrán: " + file.name);
-        }
-
-        uploadFile(file);
-      });
-    }
-
     function shortenFileName(filename, maxLength = 25) {
       const dotIndex = filename.lastIndexOf(".");
       if (dotIndex === -1) return filename;
@@ -367,21 +310,40 @@
       uploadBlock.appendChild(progress);
     }
 
-    function uploadFile(file) {
+    for (let i = 0; i < MAX_FILES; i++) {
+      createUploadRow(i);
+    }
+
+    function uploadFile(index) {
+      const fileInput = document.getElementById(`file${index}`);
+      const progressText = document.getElementById(`progress${index}`);
+
+      if (!fileInput.files.length) {
+        progressText.innerHTML = '<span style="color:red">Nejprve vyberte soubor.</span>';
+        return;
+      }
+
+      const file = fileInput.files[0];
+
+      // ✅ Check for duplicate filenames BEFORE uploading
+      const isDuplicate = uploadedModels.some(model => model.filename === file.name);
+      if (isDuplicate) {
+        progressText.innerHTML = `<span style="color:red">Soubor "${shortenFileName(file.name)}" byl již nahrán.</span>`;
+        return;
+      }
+
+      progressText.innerHTML = '';
       const formData = new FormData();
       formData.append('file', file);
 
-      const progressText = document.createElement('div');
-      progressText.className = 'progress-text';
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/upload", true);
+
       const spinner = document.createElement('span');
       spinner.className = 'spinner';
       progressText.appendChild(spinner);
-      const percentText = document.createTextNode(` 0%`);
+      const percentText = document.createTextNode(' 0%');
       progressText.appendChild(percentText);
-      progressArea.appendChild(progressText);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/upload", true);
 
       xhr.upload.onprogress = function (event) {
         if (event.lengthComputable) {
@@ -400,15 +362,18 @@
             const data = JSON.parse(xhr.responseText);
             const volume = data.volume.toFixed(2);
             const price = data.price.toFixed(2);
-            const shortName = shortenFileName(file.name);
 
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
+            const shortName = shortenFileName(file.name);
+
             resultDiv.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span>${shortName}</span>
-            <span style="font-weight: bold;">${price} Kč</span>
-          </div>`;
+             <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>${shortName}</span>
+              <span style="font-weight: bold;">${price} Kč</span>
+             </div>
+            `;
+
             resultsContainer.appendChild(resultDiv);
 
             uploadedModels.push({
@@ -417,13 +382,18 @@
               quantity: 1
             });
 
+            // ✅ Disable input and button after upload
+            fileInput.disabled = true;
+            document.querySelectorAll('.upload-btn')[index].disabled = true;
+
             renderSummary();
+
           } catch (e) {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'result';
-            errorDiv.innerHTML = `<span style="color:red">Chyba při čtení JSON</span>`;
+            errorDiv.innerHTML = `<span style="color:red">Invalid JSON response</span>`;
             resultsContainer.appendChild(errorDiv);
-            console.error(xhr.responseText);
+            console.error("JSON parse failed:", xhr.responseText);
           }
         } else {
           const errorDiv = document.createElement('div');
