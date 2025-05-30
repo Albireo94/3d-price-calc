@@ -11,6 +11,7 @@
 
   <!-- CSS Styles -->
   <style>
+    /* Base page styles */
     body {
       font-family: Arial, sans-serif;
       background-color: rgba(255, 255, 255, 0.8);
@@ -37,6 +38,7 @@
       font-size: 20px;
     }
 
+    /* Step blocks */
     .upload-block,
     .summary-block,
     .confirmation-block,
@@ -51,6 +53,16 @@
       display: block;
     }
 
+    /* Upload rows (step 1) */
+    .upload-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    /* Buttons */
     button.upload-btn {
       background-color: #fff000;
       border: none;
@@ -92,12 +104,14 @@
       opacity: 0.6;
     }
 
+    /* Divider line */
     .divider {
       border: none;
       border-top: 1px solid #ccc;
       margin: 20px 0 10px;
     }
 
+    /* Spinner */
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid #4CAF50;
@@ -132,6 +146,7 @@
       font-weight: bold;
     }
 
+    /* Total-price placeholder */
     .total {
       margin-top: 12px;
       font-weight: bold;
@@ -139,64 +154,53 @@
       padding-top: 10px;
     }
 
-    /* make each row a 4-column grid: label | quantity | “=” + total | delete button */
-    .summary-block .upload-row {
-      display: grid;
-      grid-template-columns: 1fr 60px auto 32px;
-      column-gap: 8px;
-      align-items: center;
-    }
-
-    /* center the number in its cell */
-    .summary-block .qty-input {
-      width: 100%;
-      text-align: center;
-    }
-
-    /* optional: tighten up the delete button */
-    .summary-block .remove-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.1em;
-      line-height: 1;
-    }
-
-    /* ---- 4-column grid: filename | unit-price | × + qty | =total + delete ---- */
+    /* ==== Summary step: grid layout ==== */
     .summary-block .upload-row {
       display: grid;
       grid-template-columns:
         1fr
-        /* filename (flexible) */
+        /* filename */
         auto
         /* unit price */
         auto
-        /* × */
+        /* “×” */
         60px
         /* qty input */
         auto
-        /* = */
+        /* “=” */
         auto
-        /* line total */
+        /* line-total */
         32px
-        /* delete button */
+        /* remove button */
       ;
       column-gap: 8px;
       align-items: center;
       margin-bottom: 12px;
     }
 
+    /* Prevent wrapping in fixed columns */
+    .summary-block .name,
+    .summary-block .unit,
+    .summary-block .times,
+    .summary-block .equals,
+    .summary-block .line-total {
+      white-space: nowrap;
+    }
+
+    /* Truncate long filenames */
     .summary-block .name {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
+    /* Center the number in the qty input */
     .summary-block .qty {
       width: 100%;
       text-align: center;
     }
 
+    /* Delete button style */
     .summary-block .remove {
       background: none;
       border: none;
@@ -205,6 +209,7 @@
       line-height: 1;
     }
   </style>
+
 </head>
 
 <body>
@@ -410,7 +415,7 @@
       <input 
         class="cell qty" 
         type="number" min="1" value="${qty}"
-        onchange="updateQuantity(${i}, this.value)"
+        oninput="updateQuantity(${i}, this.value)"
       />
       <span class="cell equals">=</span>
       <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
