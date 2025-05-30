@@ -112,21 +112,37 @@
 
     /* Spinner & progress */
     .spinner {
-      /* unchanged */
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
     }
 
     @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
       to {
-        transform: rotate(360deg)
+        transform: rotate(360deg);
       }
     }
 
     .progress-text {
-      /* unchanged */
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 4px;
     }
 
     .result {
-      /* unchanged */
+      margin: 4px 0 10px;
+      font-weight: bold;
     }
 
     /* Grand-total placeholder */
@@ -425,7 +441,6 @@
 
     function renderConfirmation() {
       confirmationBlock.innerHTML = `
-    <p>Potvrďte prosím správnost údajů:</p>
     <div id="confirmTotal" class="total"></div>
   `;
       const totalDiv = document.getElementById('confirmTotal');
@@ -467,7 +482,7 @@
         document.getElementById('resultsContainer').style.display = 'none';
         uploadBlock.classList.remove('active');
         summaryBlock.classList.add('active');
-        stepTitle.textContent = "Zadejte množství";
+        stepTitle.textContent = "Zadejte množství a osobní";
         backBtn.style.display = 'inline-block';
         currentStep++;
       } else if (currentStep === 2) {
