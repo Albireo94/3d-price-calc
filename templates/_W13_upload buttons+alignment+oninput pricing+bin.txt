@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online kalkulačka</title>
+
+    <!-- Import Montserrat font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS Styles -->
+    <style>
+        /* ===== Base page styles ===== */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            padding: 60px 0 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 80vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            /* default width for step 1 */
+            max-width: 90%;
+            transition: width 0.3s ease;
+            text-align: center;
+        }
+
+        .container.wide {
+            width: 600px;
+            /* width for summary/confirmation */
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 20px;
+        }
+
+        /* Step blocks */
+        .upload-block,
+        .summary-block,
+        .confirmation-block,
+        .done-block {
+            display: none;
+        }
+
+        .upload-block.active,
+        .summary-block.active,
+        .confirmation-block.active,
+        .done-block.active {
+            display: block;
+        }
+
+        /* Upload step rows */
+        .upload-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        button.upload-btn,
+        .step-button {
+            background: #fff000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 525;
+            transition: background 0.2s;
+        }
+
+        .step-button {
+            color: black;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button.upload-btn:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        /* add spacing in summary/confirmation steps */
+        .container.wide .step-button {
+            margin: 20px 8px;
+            /* vertical + horizontal space */
+        }
+
+        /* Divider */
+        .divider {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 20px 0 10px;
+        }
+
+        /* Spinner & progress */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .result {
+            margin: 4px 0 10px;
+            font-weight: bold;
+        }
+
+        /* Grand-total placeholder */
+        .total {
+            margin-top: 12px;
+            font-weight: bold;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            text-align: center;
+        }
+
+        /* GRID for summary & confirmation */
+        .summary-block .upload-row,
+        .confirmation-block .upload-row {
+            display: grid;
+            grid-template-columns:
+                1fr
+                /* filename */
+                minmax(80px, max-content)
+                /* unit price */
+                auto
+                /* “×” */
+                80px
+                /* qty input */
+                auto
+                /* “=” */
+                minmax(100px, max-content)
+                /* line-total */
+                32px
+                /* trash or blank */
+            ;
+            column-gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        /* Cell alignment */
+        .summary-block .name,
+        .confirmation-block .name {
+            justify-self: start;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .summary-block .unit,
+        .confirmation-block .unit,
+        .summary-block .times,
+        .confirmation-block .times,
+        .summary-block .equals,
+        .confirmation-block .equals,
+        .summary-block .line-total,
+        .confirmation-block .line-total {
+            justify-self: end;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .summary-block .qty,
+        .confirmation-block .qty {
+            justify-self: center;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            height: 1.8em;
+        }
+
+        .summary-block .remove {
+            justify-self: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .confirmation-block .remove {
+            display: none;
+        }
+
+        .summary-block .qty,
+        .confirmation-block .qty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* remove any fixed height so it sizes to the grid row */
+            height: auto !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2 id="stepTitle">Nahrajte 3D modely</h2>
+
+        <div class="upload-block active" id="uploadBlock"></div>
+        <hr class="divider">
+        <div id="resultsContainer"></div>
+
+        <div class="summary-block" id="summaryBlock">
+            <div id="totalPrice" class="total"></div>
+        </div>
+
+        <div class="confirmation-block" id="confirmationBlock">
+        </div>
+
+        <div class="done-block" id="doneBlock">
+            <p>Poptávka byla odeslána!</p>
+        </div>
+
+        <div id="stepControls">
+            <button class="step-button" onclick="goBack()" id="backBtn" style="display:none">Zpět</button>
+            <button class="step-button" onclick="goNext()" id="nextBtn">Další</button>
+            <button class="step-button" onclick="startOver()" id="startOverBtn" style="display:none">Zpátky na
+                začátek</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const MAX_FILES = 3;
+        const uploadBlock = document.getElementById('uploadBlock');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const totalPriceDisplay = document.getElementById('totalPrice');
+        const stepTitle = document.getElementById('stepTitle');
+        const summaryBlock = document.getElementById('summaryBlock');
+        const doneBlock = document.getElementById('doneBlock');
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const startOverBtn = document.getElementById('startOverBtn');
+
+        let totalPrice = 0;
+        let currentStep = 1;
+        let uploadedModels = [];
+
+        function shortenFileName(filename, maxLength = 25) {
+            const dotIndex = filename.lastIndexOf(".");
+            if (dotIndex === -1) return filename;
+
+            const name = filename.substring(0, dotIndex);
+            const ext = filename.substring(dotIndex); // includes the "."
+
+            if (filename.length <= maxLength) {
+                return filename;
+            }
+
+            const keepLength = maxLength - 3 - ext.length; // 3 for "..."
+            const shortened = name.substring(0, keepLength) + "..." + ext;
+            return shortened;
+        }
+
+        function createUploadRow(index) {
+            const row = document.createElement('div');
+            row.className = 'upload-row';
+            row.innerHTML = `
+        <span>${index + 1}.</span>
+        <input type="file" id="file${index}" accept=".stl,.step,.stp">
+        <button class="upload-btn" onclick="uploadFile(${index})">Nahrát</button>
+      `;
+            const progress = document.createElement('div');
+            progress.id = `progress${index}`;
+            progress.className = 'progress-text';
+            uploadBlock.appendChild(row);
+            uploadBlock.appendChild(progress);
+        }
+
+        for (let i = 0; i < MAX_FILES; i++) {
+            createUploadRow(i);
+        }
+
+        function uploadFile(index) {
+            const fileInput = document.getElementById(`file${index}`);
+            const progressText = document.getElementById(`progress${index}`);
+
+            if (!fileInput.files.length) {
+                progressText.innerHTML = '<span style="color:red">Nejprve vyberte soubor.</span>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            // ✅ Check for duplicate filenames BEFORE uploading
+            const isDuplicate = uploadedModels.some(model => model.filename === file.name);
+            if (isDuplicate) {
+                progressText.innerHTML = `<span style="color:red">Soubor "${shortenFileName(file.name)}" byl již nahrán.</span>`;
+                return;
+            }
+
+            progressText.innerHTML = '';
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/upload", true);
+
+            const spinner = document.createElement('span');
+            spinner.className = 'spinner';
+            progressText.appendChild(spinner);
+            const percentText = document.createTextNode(' 0%');
+            progressText.appendChild(percentText);
+
+            xhr.upload.onprogress = function (event) {
+                if (event.lengthComputable) {
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    percentText.nodeValue = ` ${percent}%`;
+                    if (percent === 100) {
+                        percentText.nodeValue = ` 100% - Zpracování...`;
+                    }
+                }
+            };
+
+            xhr.onload = function () {
+                progressText.innerHTML = '';
+                if (xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        const volume = data.volume.toFixed(2);
+                        const price = data.price.toFixed(2);
+
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result';
+                        const shortName = shortenFileName(file.name);
+
+                        resultDiv.innerHTML = `
+             <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>${shortName}</span>
+              <span style="font-weight: bold;">${price} Kč</span>
+             </div>
+            `;
+
+                        resultsContainer.appendChild(resultDiv);
+
+                        uploadedModels.push({
+                            filename: file.name,
+                            pricePerUnit: parseFloat(price),
+                            quantity: 1
+                        });
+
+                        // ✅ Disable input and button after upload
+                        fileInput.disabled = true;
+                        document.querySelectorAll('.upload-btn')[index].disabled = true;
+
+                        renderSummary();
+
+                    } catch (e) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'result';
+                        errorDiv.innerHTML = `<span style="color:red">Invalid JSON response</span>`;
+                        resultsContainer.appendChild(errorDiv);
+                        console.error("JSON parse failed:", xhr.responseText);
+                    }
+                } else {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'result';
+                    errorDiv.innerHTML = `<span style="color:red">Chyba u souboru ${shortenFileName(file.name)}: ${xhr.responseText}</span>`;
+                    resultsContainer.appendChild(errorDiv);
+                }
+            };
+
+            xhr.onerror = function () {
+                progressText.innerHTML = '';
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'result';
+                errorDiv.innerHTML = '<span style="color:red">Upload error</span>';
+                resultsContainer.appendChild(errorDiv);
+            };
+
+            xhr.send(formData);
+        }
+
+        function renderSummary() {
+            summaryBlock.innerHTML = `
+    <div id="totalPrice" class="total"></div>
+  `;
+            const totalDiv = document.getElementById('totalPrice');
+
+            uploadedModels.forEach((model, i) => {
+                const row = document.createElement('div');
+                row.className = 'upload-row';
+
+                const nameShort = shortenFileName(model.filename, 25);
+                const unit = model.pricePerUnit.toFixed(2);
+                const qty = model.quantity;
+                const lineTotal = (unit * qty).toFixed(2);
+
+                row.innerHTML = `
+      <span class="cell name"      title="${model.filename}">${nameShort}</span>
+      <span class="cell unit">${unit} Kč</span>
+      <span class="cell times">×</span>
+ <input
+   class="cell qty"
+   type="number" min="1" value="${qty}"
+   oninput="updateQuantity(${i}, this.value)"
+ />
+      <span class="cell equals">=</span>
+      <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
+      <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
+    `;
+                summaryBlock.insertBefore(row, totalDiv);
+            });
+
+            updateTotal();
+        }
+
+        function renderConfirmation() {
+            confirmationBlock.innerHTML = `
+    <div id="confirmTotal" class="total"></div>
+  `;
+            const totalDiv = document.getElementById('confirmTotal');
+
+            uploadedModels.forEach((model, i) => {
+                const row = document.createElement('div');
+                row.className = 'upload-row';
+
+                const nameShort = shortenFileName(model.filename, 25);
+                const unit = model.pricePerUnit.toFixed(2);
+                const qty = model.quantity;
+                const lineTotal = (model.pricePerUnit * qty).toFixed(2);
+
+                row.innerHTML = `
+      <span class="cell name"      title="${model.filename}">${nameShort}</span>
+      <span class="cell unit">${unit} Kč</span>
+      <span class="cell times">×</span>
+      <span class="cell qty">${qty}</span>
+      <span class="cell equals">=</span>
+      <span class="cell line-total">${lineTotal} Kč</span>
+      <button class="cell remove"></button>
+    `;
+                confirmationBlock.insertBefore(row, totalDiv);
+            });
+
+            // ensure container is wide here too
+            container.classList.add('wide');
+
+            // compute & show grand total
+            const sum = uploadedModels.reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0).toFixed(2);
+            totalDiv.textContent = `Celková cena: ${sum} Kč`;
+        }
+
+        const container = document.querySelector('.container');
+        function goNext() {
+            if (currentStep === 1) {
+                // Step 1 → Step 2: widen card
+                container.classList.add('wide');
+                document.getElementById('resultsContainer').style.display = 'none';
+                uploadBlock.classList.remove('active');
+                summaryBlock.classList.add('active');
+                stepTitle.textContent = "Zadejte množství a osobní";
+                backBtn.style.display = 'inline-block';
+                currentStep++;
+            } else if (currentStep === 2) {
+                // Step 2 → Step 3
+                confirmationBlock.classList.add('active');
+                summaryBlock.classList.remove('active');
+                stepTitle.textContent = "Potvrzení";
+                renderConfirmation();
+                currentStep++;
+            } else if (currentStep === 3) {
+                // Step 3 → Step 4
+                confirmationBlock.classList.remove('active');
+                doneBlock.classList.add('active');
+                stepTitle.textContent = "Hotovo";
+                nextBtn.style.display = 'none';
+                backBtn.style.display = 'none';
+                startOverBtn.style.display = 'inline-block';
+                currentStep++;
+            }
+        }
+
+        function goBack() {
+            if (currentStep === 2) {
+                // Step 2 → Step 1: shrink card
+                container.classList.remove('wide');
+                summaryBlock.classList.remove('active');
+                uploadBlock.classList.add('active');
+                document.getElementById('resultsContainer').style.display = 'block';
+                stepTitle.textContent = "Nahrajte 3D modely";
+                backBtn.style.display = 'none';
+                currentStep--;
+            } else if (currentStep === 3) {
+                // Step 3 → Step 2
+                confirmationBlock.classList.remove('active');
+                summaryBlock.classList.add('active');
+                stepTitle.textContent = "Zadejte množství";
+                currentStep--;
+            }
+        }
+
+        function startOver() {
+            location.reload();
+        }
+
+        function updateQuantity(index, value) {
+            const qty = Math.max(1, parseInt(value) || 1);
+            uploadedModels[index].quantity = qty;
+
+            // update this row's total
+            const unit = uploadedModels[index].pricePerUnit;
+            const newLineTotal = (unit * qty).toFixed(2);
+            document.getElementById(`lineTotal${index}`).textContent = `${newLineTotal} Kč`;
+
+            // update grand total
+            updateTotal();
+        }
+
+        function updateTotal() {
+            // 1) compute the sum
+            const sum = uploadedModels
+                .reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0)
+                .toFixed(2);
+
+            // 2) find the placeholder and write it
+            const totalPriceDisplay = document.getElementById('totalPrice');
+            if (totalPriceDisplay) {
+                totalPriceDisplay.textContent = `Celková cena: ${sum} Kč`;
+            }
+        }
+
+        function removeModel(index) {
+            // remove from the array
+            uploadedModels.splice(index, 1);
+
+            // re-render summary rows AND grand total
+            renderSummary();
+        }
+    </script>
+</body>
+
+</html>
