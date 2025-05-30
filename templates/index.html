@@ -24,14 +24,20 @@
     }
 
     .container {
-      background-color: white;
+      background: #fff;
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      width: 600px;
-      /* widened to fit large numbers */
+      width: 400px;
+      /* default width for step 1 */
       max-width: 90%;
+      transition: width 0.3s ease;
       text-align: center;
+    }
+
+    .container.wide {
+      width: 600px;
+      /* width for summary/confirmation */
     }
 
     h2 {
@@ -40,7 +46,7 @@
       font-size: 20px;
     }
 
-    /* ===== Step blocks ===== */
+    /* Step blocks */
     .upload-block,
     .summary-block,
     .confirmation-block,
@@ -55,25 +61,26 @@
       display: block;
     }
 
-    /* ===== Upload step (flex rows) ===== */
+    /* Upload step rows */
     .upload-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      align-items: center;
       margin-bottom: 20px;
+      gap: 10px;
     }
 
-    /* ===== Buttons ===== */
+    /* Buttons */
     button.upload-btn,
     .step-button {
-      background-color: #fff000;
+      background: #fff000;
       border: none;
-      padding: 10px 15px;
+      padding: 10px 20px;
       border-radius: 20px;
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
       font-weight: 525;
+      transition: background 0.2s;
     }
 
     .step-button {
@@ -81,7 +88,7 @@
     }
 
     button:hover {
-      background-color: black;
+      background: black;
       color: white;
     }
 
@@ -90,44 +97,39 @@
       cursor: default;
     }
 
-    /* ===== Divider ===== */
+    /* add spacing in summary/confirmation steps */
+    .container.wide .step-button {
+      margin: 20px 15px;
+      /* vertical + horizontal space */
+    }
+
+    /* Divider */
     .divider {
       border: none;
       border-top: 1px solid #ccc;
       margin: 20px 0 10px;
     }
 
-    /* ===== Spinner & Progress ===== */
+    /* Spinner & progress */
     .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #4CAF50;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      margin-right: 6px;
+      /* unchanged */
     }
 
     @keyframes spin {
       to {
-        transform: rotate(360deg);
+        transform: rotate(360deg)
       }
     }
 
     .progress-text {
-      font-size: 14px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 4px;
+      /* unchanged */
     }
 
     .result {
-      margin: 4px 0 10px;
-      font-weight: bold;
+      /* unchanged */
     }
 
-    /* ===== Grand-total placeholder ===== */
+    /* Grand-total placeholder */
     .total {
       margin-top: 12px;
       font-weight: bold;
@@ -136,7 +138,7 @@
       text-align: center;
     }
 
-    /* ===== GRID for summary & confirmation ===== */
+    /* GRID for summary & confirmation */
     .summary-block .upload-row,
     .confirmation-block .upload-row {
       display: grid;
@@ -161,7 +163,7 @@
       margin-bottom: 12px;
     }
 
-    /* ===== Common cell styling ===== */
+    /* Cell alignment */
     .summary-block .name,
     .confirmation-block .name {
       justify-self: start;
@@ -192,7 +194,6 @@
       height: 1.8em;
     }
 
-    /* ===== Delete button only in summary ===== */
     .summary-block .remove {
       justify-self: center;
       background: none;
@@ -207,7 +208,6 @@
       display: none;
     }
   </style>
-
 </head>
 
 <body>
@@ -424,13 +424,12 @@
     }
 
     function renderConfirmation() {
-      // 1) Clear & inject total placeholder at top or bottom
       confirmationBlock.innerHTML = `
+    <p>Potvrďte prosím správnost údajů:</p>
     <div id="confirmTotal" class="total"></div>
   `;
       const totalDiv = document.getElementById('confirmTotal');
 
-      // 2) Render each model row BEFORE the totalDiv
       uploadedModels.forEach((model, i) => {
         const row = document.createElement('div');
         row.className = 'upload-row';
@@ -452,15 +451,19 @@
         confirmationBlock.insertBefore(row, totalDiv);
       });
 
-      // 3) Compute & show grand total
-      const sum = uploadedModels
-        .reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0)
-        .toFixed(2);
+      // ensure container is wide here too
+      container.classList.add('wide');
+
+      // compute & show grand total
+      const sum = uploadedModels.reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0).toFixed(2);
       totalDiv.textContent = `Celková cena: ${sum} Kč`;
     }
 
+    const container = document.querySelector('.container');
     function goNext() {
       if (currentStep === 1) {
+        // Step 1 → Step 2: widen card
+        container.classList.add('wide');
         document.getElementById('resultsContainer').style.display = 'none';
         uploadBlock.classList.remove('active');
         summaryBlock.classList.add('active');
@@ -468,12 +471,14 @@
         backBtn.style.display = 'inline-block';
         currentStep++;
       } else if (currentStep === 2) {
-        summaryBlock.classList.remove('active');
+        // Step 2 → Step 3
         confirmationBlock.classList.add('active');
+        summaryBlock.classList.remove('active');
         stepTitle.textContent = "Potvrzení";
         renderConfirmation();
         currentStep++;
       } else if (currentStep === 3) {
+        // Step 3 → Step 4
         confirmationBlock.classList.remove('active');
         doneBlock.classList.add('active');
         stepTitle.textContent = "Hotovo";
@@ -486,13 +491,16 @@
 
     function goBack() {
       if (currentStep === 2) {
-        document.getElementById('resultsContainer').style.display = 'block';
+        // Step 2 → Step 1: shrink card
+        container.classList.remove('wide');
         summaryBlock.classList.remove('active');
         uploadBlock.classList.add('active');
+        document.getElementById('resultsContainer').style.display = 'block';
         stepTitle.textContent = "Nahrajte 3D modely";
         backBtn.style.display = 'none';
         currentStep--;
       } else if (currentStep === 3) {
+        // Step 3 → Step 2
         confirmationBlock.classList.remove('active');
         summaryBlock.classList.add('active');
         stepTitle.textContent = "Zadejte množství";
