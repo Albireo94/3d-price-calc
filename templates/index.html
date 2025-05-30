@@ -415,7 +415,7 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = shortenFileName(model.filename, 15);
+        const nameShort = shortenFileName(model.filename, 25);
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
         const lineTotal = (unit * qty).toFixed(2);
@@ -449,7 +449,7 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = shortenFileName(model.filename, 15);
+        const nameShort = shortenFileName(model.filename, 25);
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
         const lineTotal = (model.pricePerUnit * qty).toFixed(2);
