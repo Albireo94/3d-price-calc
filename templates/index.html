@@ -557,9 +557,13 @@
       <span class="cell times">×</span>
 <input
   class="cell qty"
-  type="number" min="1" max="999" value="${qty}"
-  oninput="updateQuantity(${i}, this.value)"
+  type="number"
+  min="1"
+  max="999"
+  value="${qty}"
+  oninput="updateQuantity(${i}, this)"
 />
+
       <span class="cell equals">=</span>
       <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
       <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
@@ -659,16 +663,15 @@
       location.reload();
     }
 
-    function updateQuantity(index, value) {
-      let qty = parseInt(value) || 1;
+    function updateQuantity(index, inputElem) {
+      let qty = parseInt(inputElem.value) || 1;
 
-      // Clamp value between 1 and 999
+      // Clamp to 1–999
       if (qty < 1) qty = 1;
       if (qty > 999) qty = 999;
 
-      // Reflect corrected value back in the input field
-      const input = document.querySelectorAll('.summary-block .qty input')[index];
-      if (input) input.value = qty;
+      // Set the corrected value back to the input
+      inputElem.value = qty;
 
       uploadedModels[index].quantity = qty;
 
@@ -678,6 +681,7 @@
 
       updateTotal();
     }
+
 
 
     function updateTotal() {
