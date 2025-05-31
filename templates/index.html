@@ -486,10 +486,9 @@
               // 3. Clear summaries and update
               resultsContainer.innerHTML = "";
               renderSummary();
-            }
-          };
-          
-          catch (e) {
+            };
+
+          } catch (e) {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'result';
             errorDiv.innerHTML = `<span style="color:red">Chyba při čtení JSON</span>`;
