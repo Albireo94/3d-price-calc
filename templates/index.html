@@ -186,6 +186,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      max-width: 350px;
     }
 
     .summary-block .unit,
@@ -460,6 +461,8 @@
 
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
+            resultDiv.id = `result-${file.name}`;
+
             resultDiv.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span>${shortName}</span>
@@ -470,6 +473,8 @@
             // Tile preview
             const previewBox = document.createElement('div');
             previewBox.className = 'file-preview';
+            previewBox.id = `preview-${file.name}`;
+
             previewBox.title = file.name;
             previewBox.textContent = shortName;
 
@@ -479,11 +484,15 @@
             previewBox.appendChild(removeIcon);
             document.getElementById('filePreviewContainer').appendChild(previewBox);
 
-            previewBox.onclick = () => {
-              uploadedModels = uploadedModels.filter(m => m.filename !== file.name);
-              previewBox.remove();
-              resultsContainer.innerHTML = "";
-              renderSummary();
+            removeIcon.onclick = (e) => {
+              e.stopPropagation(); // prevent previewBox click
+              const index = uploadedModels.findIndex(m => m.filename === file.name);
+              if (index !== -1) {
+                uploadedModels.splice(index, 1); // remove model
+                document.getElementById(`preview-${file.name}`)?.remove();
+                document.getElementById(`result-${file.name}`)?.remove();
+                renderSummary();
+              }
             };
 
             // ✅ Store data for summary/confirmation
