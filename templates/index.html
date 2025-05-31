@@ -401,18 +401,6 @@
       return nameOnly.substring(0, maxLength - 3) + "...";
     }
 
-
-    const name = filename.substring(0, dotIndex);
-    const ext = filename.substring(dotIndex); // includes the "."
-
-    if (filename.length <= maxLength) {
-      return filename;
-
-      const keepLength = maxLength - 3 - ext.length; // 3 for "..."
-      const shortened = name.substring(0, keepLength) + "..." + ext;
-      return shortened;
-    }
-
     function createUploadRow(index) {
       const row = document.createElement('div');
       row.className = 'upload-row';
@@ -498,51 +486,51 @@
               // 3. Clear summaries and update
               resultsContainer.innerHTML = "";
               renderSummary();
-            };
-
+            }
+          };
           
           catch (e) {
-              const errorDiv = document.createElement('div');
-              errorDiv.className = 'result';
-              errorDiv.innerHTML = `<span style="color:red">Chyba při čtení JSON</span>`;
-              resultsContainer.appendChild(errorDiv);
-              console.error(xhr.responseText);
-            }
-          } else {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'result';
-            errorDiv.innerHTML = `<span style="color:red">Chyba u souboru ${shortenFileName(file.name)}: ${xhr.responseText}</span>`;
+            errorDiv.innerHTML = `<span style="color:red">Chyba při čtení JSON</span>`;
             resultsContainer.appendChild(errorDiv);
+            console.error(xhr.responseText);
           }
-        };
-
-        xhr.onerror = function () {
-          progressText.innerHTML = '';
+        } else {
           const errorDiv = document.createElement('div');
           errorDiv.className = 'result';
-          errorDiv.innerHTML = '<span style="color:red">Upload error</span>';
+          errorDiv.innerHTML = `<span style="color:red">Chyba u souboru ${shortenFileName(file.name)}: ${xhr.responseText}</span>`;
           resultsContainer.appendChild(errorDiv);
-        };
+        }
+      };
 
-        xhr.send(formData);
-      }
+      xhr.onerror = function () {
+        progressText.innerHTML = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'result';
+        errorDiv.innerHTML = '<span style="color:red">Upload error</span>';
+        resultsContainer.appendChild(errorDiv);
+      };
 
-      function renderSummary() {
-        summaryBlock.innerHTML = `
+      xhr.send(formData);
+    }
+
+    function renderSummary() {
+      summaryBlock.innerHTML = `
     <div id="totalPrice" class="total"></div>
   `;
-        const totalDiv = document.getElementById('totalPrice');
+      const totalDiv = document.getElementById('totalPrice');
 
-        uploadedModels.forEach((model, i) => {
-          const row = document.createElement('div');
-          row.className = 'upload-row';
+      uploadedModels.forEach((model, i) => {
+        const row = document.createElement('div');
+        row.className = 'upload-row';
 
-          const nameShort = shortenFileName(model.filename, 25);
-          const unit = model.pricePerUnit.toFixed(2);
-          const qty = model.quantity;
-          const lineTotal = (unit * qty).toFixed(2);
+        const nameShort = shortenFileName(model.filename, 25);
+        const unit = model.pricePerUnit.toFixed(2);
+        const qty = model.quantity;
+        const lineTotal = (unit * qty).toFixed(2);
 
-          row.innerHTML = `
+        row.innerHTML = `
       <span class="cell name"      title="${model.filename}">${nameShort}</span>
       <span class="cell unit">${unit} Kč</span>
       <span class="cell times">×</span>
@@ -555,28 +543,28 @@
       <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
       <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
     `;
-          summaryBlock.insertBefore(row, totalDiv);
-        });
+        summaryBlock.insertBefore(row, totalDiv);
+      });
 
-        updateTotal();
-      }
+      updateTotal();
+    }
 
-      function renderConfirmation() {
-        confirmationBlock.innerHTML = `
+    function renderConfirmation() {
+      confirmationBlock.innerHTML = `
     <div id="confirmTotal" class="total"></div>
   `;
-        const totalDiv = document.getElementById('confirmTotal');
+      const totalDiv = document.getElementById('confirmTotal');
 
-        uploadedModels.forEach((model, i) => {
-          const row = document.createElement('div');
-          row.className = 'upload-row';
+      uploadedModels.forEach((model, i) => {
+        const row = document.createElement('div');
+        row.className = 'upload-row';
 
-          const nameShort = shortenFileName(model.filename, 25);
-          const unit = model.pricePerUnit.toFixed(2);
-          const qty = model.quantity;
-          const lineTotal = (model.pricePerUnit * qty).toFixed(2);
+        const nameShort = shortenFileName(model.filename, 25);
+        const unit = model.pricePerUnit.toFixed(2);
+        const qty = model.quantity;
+        const lineTotal = (model.pricePerUnit * qty).toFixed(2);
 
-          row.innerHTML = `
+        row.innerHTML = `
       <span class="cell name"      title="${model.filename}">${nameShort}</span>
       <span class="cell unit">${unit} Kč</span>
       <span class="cell times">×</span>
@@ -585,103 +573,103 @@
       <span class="cell line-total">${lineTotal} Kč</span>
       <button class="cell remove"></button>
     `;
-          confirmationBlock.insertBefore(row, totalDiv);
-        });
+        confirmationBlock.insertBefore(row, totalDiv);
+      });
 
-        // ensure container is wide here too
+      // ensure container is wide here too
+      container.classList.add('wide');
+
+      // compute & show grand total
+      const sum = uploadedModels.reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0).toFixed(2);
+      totalDiv.textContent = `Celková cena: ${sum} Kč`;
+    }
+
+    const container = document.querySelector('.container');
+    function goNext() {
+      if (currentStep === 1) {
+        // Step 1 → Step 2: widen card
         container.classList.add('wide');
-
-        // compute & show grand total
-        const sum = uploadedModels.reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0).toFixed(2);
-        totalDiv.textContent = `Celková cena: ${sum} Kč`;
+        document.getElementById('resultsContainer').style.display = 'none';
+        uploadBlock.classList.remove('active');
+        summaryBlock.classList.add('active');
+        stepTitle.textContent = "Zadejte množství a osobní informace";
+        backBtn.style.display = 'inline-block';
+        currentStep++;
+      } else if (currentStep === 2) {
+        // Step 2 → Step 3
+        confirmationBlock.classList.add('active');
+        summaryBlock.classList.remove('active');
+        stepTitle.textContent = "Potvrzení";
+        renderConfirmation();
+        currentStep++;
+      } else if (currentStep === 3) {
+        // Step 3 → Step 4
+        confirmationBlock.classList.remove('active');
+        doneBlock.classList.add('active');
+        stepTitle.textContent = "Hotovo";
+        nextBtn.style.display = 'none';
+        backBtn.style.display = 'none';
+        startOverBtn.style.display = 'inline-block';
+        currentStep++;
       }
+    }
 
-      const container = document.querySelector('.container');
-      function goNext() {
-        if (currentStep === 1) {
-          // Step 1 → Step 2: widen card
-          container.classList.add('wide');
-          document.getElementById('resultsContainer').style.display = 'none';
-          uploadBlock.classList.remove('active');
-          summaryBlock.classList.add('active');
-          stepTitle.textContent = "Zadejte množství a osobní informace";
-          backBtn.style.display = 'inline-block';
-          currentStep++;
-        } else if (currentStep === 2) {
-          // Step 2 → Step 3
-          confirmationBlock.classList.add('active');
-          summaryBlock.classList.remove('active');
-          stepTitle.textContent = "Potvrzení";
-          renderConfirmation();
-          currentStep++;
-        } else if (currentStep === 3) {
-          // Step 3 → Step 4
-          confirmationBlock.classList.remove('active');
-          doneBlock.classList.add('active');
-          stepTitle.textContent = "Hotovo";
-          nextBtn.style.display = 'none';
-          backBtn.style.display = 'none';
-          startOverBtn.style.display = 'inline-block';
-          currentStep++;
-        }
+    function goBack() {
+      if (currentStep === 2) {
+        // Step 2 → Step 1: shrink card
+        container.classList.remove('wide');
+        summaryBlock.classList.remove('active');
+        uploadBlock.classList.add('active');
+        document.getElementById('resultsContainer').style.display = 'block';
+        stepTitle.textContent = "Nahrajte 3D modely";
+        backBtn.style.display = 'none';
+        currentStep--;
+      } else if (currentStep === 3) {
+        // Step 3 → Step 2
+        confirmationBlock.classList.remove('active');
+        summaryBlock.classList.add('active');
+        stepTitle.textContent = "Zadejte množství";
+        currentStep--;
       }
+    }
 
-      function goBack() {
-        if (currentStep === 2) {
-          // Step 2 → Step 1: shrink card
-          container.classList.remove('wide');
-          summaryBlock.classList.remove('active');
-          uploadBlock.classList.add('active');
-          document.getElementById('resultsContainer').style.display = 'block';
-          stepTitle.textContent = "Nahrajte 3D modely";
-          backBtn.style.display = 'none';
-          currentStep--;
-        } else if (currentStep === 3) {
-          // Step 3 → Step 2
-          confirmationBlock.classList.remove('active');
-          summaryBlock.classList.add('active');
-          stepTitle.textContent = "Zadejte množství";
-          currentStep--;
-        }
+    function startOver() {
+      location.reload();
+    }
+
+    function updateQuantity(index, value) {
+      const qty = Math.max(1, parseInt(value) || 1);
+      uploadedModels[index].quantity = qty;
+
+      // update this row's total
+      const unit = uploadedModels[index].pricePerUnit;
+      const newLineTotal = (unit * qty).toFixed(2);
+      document.getElementById(`lineTotal${index}`).textContent = `${newLineTotal} Kč`;
+
+      // update grand total
+      updateTotal();
+    }
+
+    function updateTotal() {
+      // 1) compute the sum
+      const sum = uploadedModels
+        .reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0)
+        .toFixed(2);
+
+      // 2) find the placeholder and write it
+      const totalPriceDisplay = document.getElementById('totalPrice');
+      if (totalPriceDisplay) {
+        totalPriceDisplay.textContent = `Celková cena: ${sum} Kč`;
       }
+    }
 
-      function startOver() {
-        location.reload();
-      }
+    function removeModel(index) {
+      // remove from the array
+      uploadedModels.splice(index, 1);
 
-      function updateQuantity(index, value) {
-        const qty = Math.max(1, parseInt(value) || 1);
-        uploadedModels[index].quantity = qty;
-
-        // update this row's total
-        const unit = uploadedModels[index].pricePerUnit;
-        const newLineTotal = (unit * qty).toFixed(2);
-        document.getElementById(`lineTotal${index}`).textContent = `${newLineTotal} Kč`;
-
-        // update grand total
-        updateTotal();
-      }
-
-      function updateTotal() {
-        // 1) compute the sum
-        const sum = uploadedModels
-          .reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0)
-          .toFixed(2);
-
-        // 2) find the placeholder and write it
-        const totalPriceDisplay = document.getElementById('totalPrice');
-        if (totalPriceDisplay) {
-          totalPriceDisplay.textContent = `Celková cena: ${sum} Kč`;
-        }
-      }
-
-      function removeModel(index) {
-        // remove from the array
-        uploadedModels.splice(index, 1);
-
-        // re-render summary rows AND grand total
-        renderSummary();
-      }
+      // re-render summary rows AND grand total
+      renderSummary();
+    }
   </script>
 </body>
 
