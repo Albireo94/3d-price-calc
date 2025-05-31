@@ -555,11 +555,11 @@
       <span class="name" title="${model.filename}">${nameShort}</span>
       <span class="cell unit">${unit} Kč</span>
       <span class="cell times">×</span>
- <input
-   class="cell qty"
-   type="number" min="1" value="${qty}"
-   oninput="updateQuantity(${i}, this.value)"
- />
+<input
+  class="cell qty"
+  type="number" min="1" max="999" value="${qty}"
+  oninput="updateQuantity(${i}, this.value)"
+/>
       <span class="cell equals">=</span>
       <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
       <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
@@ -660,15 +660,13 @@
     }
 
     function updateQuantity(index, value) {
-      const qty = Math.max(1, parseInt(value) || 1);
+      let qty = parseInt(value) || 1;
+      qty = Math.max(1, Math.min(qty, 999)); // restrict between 1 and 999
       uploadedModels[index].quantity = qty;
 
-      // update this row's total
       const unit = uploadedModels[index].pricePerUnit;
       const newLineTotal = (unit * qty).toFixed(2);
       document.getElementById(`lineTotal${index}`).textContent = `${newLineTotal} Kč`;
-
-      // update grand total
       updateTotal();
     }
 
