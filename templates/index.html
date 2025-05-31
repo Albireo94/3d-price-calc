@@ -482,7 +482,7 @@
           const percent = Math.round((event.loaded / event.total) * 100);
           const percentElem = previewBox.querySelector('.percent');
           if (percentElem) {
-            percentElem.textContent = percent === 100 ? 'Zpracování...' : `${percent}%`;
+            percentElem.textContent = percent === 100 ? 'Pracuji...' : `${percent}%`;
           }
         }
       };
@@ -513,6 +513,10 @@
             // ✅ Remove spinner/status after delay
             setTimeout(() => {
               statusDiv.remove();
+
+              const nameDiv = document.createElement('div');
+              nameDiv.textContent = shortName;
+              previewBox.insertBefore(nameDiv, removeIcon);
             }, 500);
 
             renderSummary();
