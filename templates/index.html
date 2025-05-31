@@ -233,6 +233,7 @@
 
     .confirmation-block .remove {
       visibility: hidden;
+      height: 1.2em;
     }
 
     #dropZone {
@@ -407,6 +408,14 @@
       const nameOnly = filename.replace(/\.[^/.]+$/, ""); // remove extension
       if (nameOnly.length <= maxLength) return nameOnly;
       return nameOnly.substring(0, maxLength - 3) + "...";
+    }
+
+    function shortenFileNameWithExtension(filename, maxLength = 35) {
+      if (filename.length <= maxLength) return filename;
+      const extIndex = filename.lastIndexOf('.');
+      const ext = extIndex !== -1 ? filename.slice(extIndex) : '';
+      const nameOnly = filename.slice(0, maxLength - ext.length - 3);
+      return nameOnly + '...' + ext;
     }
 
     function createUploadRow(index) {
@@ -675,22 +684,19 @@
     }
 
     function removeModel(index) {
-      const model = uploadedModels[index];
+      const filename = uploadedModels[index].filename;
 
-      // 1. Odebrat z pole
+      // Remove from the array
       uploadedModels.splice(index, 1);
 
-      // 2. Odebrat dlaždici v dropzóně (Step 1)
-      const previewElement = document.getElementById(`preview-${model.filename}`);
-      if (previewElement) previewElement.remove();
+      // Remove from upload step (tile + result below drop zone)
+      document.getElementById(`preview-${filename}`)?.remove();
+      document.getElementById(`result-${filename}`)?.remove();
 
-      // 3. Odebrat výsledek v dolní části Step 1
-      const resultElement = document.getElementById(`result-${model.filename}`);
-      if (resultElement) resultElement.remove();
-
-      // 4. Přegenerovat přehled (Step 2)
+      // Re-render summary step
       renderSummary();
     }
+
 
   </script>
 </body>
