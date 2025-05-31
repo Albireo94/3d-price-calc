@@ -159,10 +159,11 @@
         .confirmation-block .upload-row {
             display: grid;
             grid-template-columns:
-                220px minmax(80px, max-content) auto 60px auto minmax(80px, max-content) 32px;
-            column-gap: 12px;
+                180px minmax(80px, max-content) auto 50px 5px minmax(80px, max-content) 20px;
+            column-gap: 6px;
             align-items: center;
             margin-bottom: 12px;
+            margin-left: 8px;
             padding: 4px 0;
         }
 
@@ -175,7 +176,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             max-width: 100%;
-            /*180px;*/
         }
 
         .summary-block .unit,
@@ -189,6 +189,14 @@
             justify-self: end;
             white-space: nowrap;
             text-align: right;
+        }
+
+        .summary-block .times,
+        .confirmation-block .times {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            width: 5px;
         }
 
         .summary-block .qty input,
@@ -222,8 +230,8 @@
             font-size: 1.2em;
             line-height: 1;
             padding: 0;
-            padding-right: 10px;
-            margin-right: 5px;
+            padding-right: 5px;
+            margin-right: 2px;
         }
 
         .confirmation-block .remove {
@@ -254,7 +262,6 @@
         #dropZone.dragover {
             background-color: #f4f775;
         }
-
 
         #filePreviewContainer {
             margin-top: 10px;
@@ -305,6 +312,14 @@
             pointer-events: auto;
             font-weight: bold;
         }
+
+        .upload-status {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
     </style>
 </head>
 
@@ -315,7 +330,7 @@
         <div class="upload-block active" id="uploadBlock">
 
             <div id="dropZone">
-                <p style="margin: 0;">Sem přetáhněte soubory</p>
+                <p style="margin: 0;">Sem přetáhněte STL/STP soubory</p>
                 <div id="filePreviewContainer"></div> <!-- Add this line -->
                 <input type="file" id="fileInput" accept=".stl,.step,.stp" multiple style="display: none;">
             </div>
@@ -398,15 +413,15 @@
                 }
 
                 // prevent duplicate names
-                if (uploadedModels.some(m => m.filename === file.name)) {
-                    return alert("Soubor už byl nahrán: " + file.name);
+                if (document.getElementById(`preview-${file.name}`)) {
+                    return alert("Soubor už je právě nahráván nebo zobrazen: " + file.name);
                 }
 
                 uploadFile(file);
             });
         }
 
-        function shortenFileName(filename, maxLength = 25) {
+        function shortenFileName(filename, maxLength = 30) {
             const nameOnly = filename.replace(/\.[^/.]+$/, ""); // remove extension
             if (nameOnly.length <= maxLength) return nameOnly;
             return nameOnly.substring(0, maxLength - 3) + "...";
@@ -439,14 +454,37 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            const progressText = document.createElement('div');
-            progressText.className = 'progress-text';
-            const spinner = document.createElement('span');
-            spinner.className = 'spinner';
-            progressText.appendChild(spinner);
-            const percentText = document.createTextNode(` 0%`);
-            progressText.appendChild(percentText);
-            progressArea.appendChild(progressText);
+            const shortName = shortenFileName(file.name);
+            const previewBox = document.createElement('div');
+            previewBox.className = 'file-preview';
+            previewBox.id = `preview-${file.name}`;
+            previewBox.title = file.name;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.textContent = shortName;
+
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'upload-status';
+            statusDiv.style.marginTop = '8px';
+            statusDiv.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span><span class="percent">0%</span>`;
+
+            const removeIcon = document.createElement('span');
+            removeIcon.className = 'remove-icon';
+            removeIcon.textContent = '✖';
+
+            previewBox.append(nameDiv, statusDiv, removeIcon);
+            document.getElementById('filePreviewContainer').appendChild(previewBox);
+
+            removeIcon.onclick = (e) => {
+                e.stopPropagation();
+                const index = uploadedModels.findIndex(m => m.filename === file.name);
+                if (index !== -1) {
+                    uploadedModels.splice(index, 1);
+                    document.getElementById(`preview-${file.name}`)?.remove();
+                    document.getElementById(`result-${file.name}`)?.remove();
+                    renderSummary();
+                }
+            };
 
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "/upload", true);
@@ -454,84 +492,52 @@
             xhr.upload.onprogress = function (event) {
                 if (event.lengthComputable) {
                     const percent = Math.round((event.loaded / event.total) * 100);
-                    percentText.nodeValue = ` ${percent}%`;
-                    if (percent === 100) {
-                        percentText.nodeValue = ` 100% - Zpracování...`;
+                    const percentElem = previewBox.querySelector('.percent');
+                    if (percentElem) {
+                        percentElem.textContent = percent === 100 ? 'Zpracování...' : `${percent}%`;
                     }
                 }
             };
 
             xhr.onload = function () {
-                progressText.innerHTML = '';
-
                 if (xhr.status === 200) {
                     try {
                         const data = JSON.parse(xhr.responseText);
-                        const volume = data.volume.toFixed(2);
                         const price = data.price.toFixed(2);
-                        const shortName = shortenFileName(file.name);
 
-                        const resultDiv = document.createElement('div');
-                        resultDiv.className = 'result';
-                        resultDiv.id = `result-${file.name}`;
-
-                        resultDiv.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>${shortName}</span>
-          <span style="font-weight: bold;">${price} Kč</span>
-        </div>`;
-                        resultsContainer.appendChild(resultDiv);
-
-                        // Tile preview
-                        const previewBox = document.createElement('div');
-                        previewBox.className = 'file-preview';
-                        previewBox.id = `preview-${file.name}`;
-
-                        previewBox.title = file.name;
-                        previewBox.textContent = shortName;
-
-                        const removeIcon = document.createElement('span');
-                        removeIcon.className = 'remove-icon';
-                        removeIcon.textContent = '✖';
-                        previewBox.appendChild(removeIcon);
-                        document.getElementById('filePreviewContainer').appendChild(previewBox);
-
-                        removeIcon.onclick = (e) => {
-                            e.stopPropagation(); // prevent previewBox click
-                            const index = uploadedModels.findIndex(m => m.filename === file.name);
-                            if (index !== -1) {
-                                uploadedModels.splice(index, 1); // remove model
-                                document.getElementById(`preview-${file.name}`)?.remove();
-                                document.getElementById(`result-${file.name}`)?.remove();
-                                renderSummary();
-                            }
-                        };
-
-                        // ✅ Store data for summary/confirmation
                         uploadedModels.push({
                             filename: file.name,
                             pricePerUnit: parseFloat(price),
                             quantity: 1
                         });
 
+                        // ✅ Show bottom summary (price preview)
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result';
+                        resultDiv.id = `result-${file.name}`;
+                        resultDiv.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>${shortName}</span>
+            <span style="font-weight: bold;">${price} Kč</span>
+          </div>`;
+                        resultsContainer.appendChild(resultDiv);
+
+                        // ✅ Remove spinner/status after delay
+                        setTimeout(() => {
+                            statusDiv.remove();
+                        }, 500);
+
                         renderSummary();
 
                     } catch (e) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'result';
-                        errorDiv.innerHTML = `<span style="color:red">Chyba při čtení JSON</span>`;
-                        resultsContainer.appendChild(errorDiv);
-                        console.error(xhr.responseText);
+                        console.error('JSON error', xhr.responseText);
+                        statusDiv.innerHTML = '<span style="color:red; font-size: 12px;">Chyba při zpracování</span>';
                     }
                 }
             };
 
             xhr.onerror = function () {
-                progressText.innerHTML = '';
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'result';
-                errorDiv.innerHTML = '<span style="color:red">Upload error</span>';
-                resultsContainer.appendChild(errorDiv);
+                statusDiv.innerHTML = '<span style="color:red; font-size: 12px;">Chyba při nahrávání</span>';
             };
 
             xhr.send(formData);
@@ -556,11 +562,15 @@
       <span class="name" title="${model.filename}">${nameShort}</span>
       <span class="cell unit">${unit} Kč</span>
       <span class="cell times">×</span>
- <input
-   class="cell qty"
-   type="number" min="1" value="${qty}"
-   oninput="updateQuantity(${i}, this.value)"
- />
+<input
+  class="cell qty"
+  type="number"
+  min="1"
+  max="999"
+  value="${qty}"
+  oninput="updateQuantity(${i}, this)"
+/>
+
       <span class="cell equals">=</span>
       <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
       <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
@@ -660,18 +670,26 @@
             location.reload();
         }
 
-        function updateQuantity(index, value) {
-            const qty = Math.max(1, parseInt(value) || 1);
+        function updateQuantity(index, inputElem) {
+            let qty = parseInt(inputElem.value) || 1;
+
+            // Clamp to 1–999
+            if (qty < 1) qty = 1;
+            if (qty > 999) qty = 999;
+
+            // Set the corrected value back to the input
+            inputElem.value = qty;
+
             uploadedModels[index].quantity = qty;
 
-            // update this row's total
             const unit = uploadedModels[index].pricePerUnit;
             const newLineTotal = (unit * qty).toFixed(2);
             document.getElementById(`lineTotal${index}`).textContent = `${newLineTotal} Kč`;
 
-            // update grand total
             updateTotal();
         }
+
+
 
         function updateTotal() {
             // 1) compute the sum
