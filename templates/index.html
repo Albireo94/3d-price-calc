@@ -230,7 +230,7 @@
       line-height: 1;
       padding: 0;
       padding-right: 10px;
-      margin-right: 4px;
+      margin-right: 5px;
     }
 
     .confirmation-block .remove {
@@ -302,8 +302,9 @@
     }
 
     .file-preview:hover .remove-icon {
-      opacity: 1;
+      opacity: 0.9;
       pointer-events: auto;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -587,15 +588,15 @@
         const lineTotal = (model.pricePerUnit * qty).toFixed(2);
 
         row.innerHTML = `
-      <span class="cell name"      title="${model.filename}">${nameShort}</span>
-      <span class="cell unit">${unit} Kč</span>
-      <span class="cell times">×</span>
-      <span class="cell qty">${qty}</span>
-      <span class="cell equals">=</span>
-      <span class="cell line-total">${lineTotal} Kč</span>
-      <span class="cell remove"></span>
-      <button class="cell remove"></button>
-    `;
+         <span class="cell name"      title="${model.filename}">${nameShort}</span>
+         <span class="cell unit">${unit} Kč</span>
+         <span class="cell times">×</span>
+         <span class="cell qty">${qty}</span>
+         <span class="cell equals">=</span>
+         <span class="cell line-total">${lineTotal} Kč</span>
+         <span class="cell remove"></span> <!-- Prázdná buňka jen kvůli zarovnání -->
+      `;
+
         confirmationBlock.insertBefore(row, totalDiv);
       });
 
