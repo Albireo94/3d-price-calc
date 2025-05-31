@@ -234,11 +234,11 @@
     }
 
     #dropZone {
-      transition: background 0.3s;
-      text-align: center;
-      background-color: #f9f9f9;
-      position: relative;
-      min-height: 120px;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 30px;
+      cursor: pointer;
+      transition: background 0.3s, border 0.3s;
     }
 
     /* 🖱️ Mouse hover */
@@ -309,7 +309,7 @@
 
     <div class="upload-block active" id="uploadBlock">
 
-      <div id="dropZone" style="border: 2px dashed #ccc; border-radius: 8px; padding: 30px; cursor: pointer;">
+      <div id="dropZone">
         <p style="margin: 0;">Sem přetáhněte soubory</p>
         <div id="filePreviewContainer"></div> <!-- Add this line -->
         <input type="file" id="fileInput" accept=".stl,.step,.stp" multiple style="display: none;">
