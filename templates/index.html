@@ -159,20 +159,7 @@
     .confirmation-block .upload-row {
       display: grid;
       grid-template-columns:
-        280px
-        /* <-- filename column (fixed) */
-        minmax(80px, max-content)
-        /* unit price */
-        auto
-        /* × symbol */
-        60px
-        /* quantity input */
-        auto
-        /* = symbol */
-        minmax(80px, max-content)
-        /* total price */
-        32px;
-      /* trash icon */
+        220px minmax(80px, max-content) auto 50px auto minmax(80px, max-content) 32px;
       column-gap: 12px;
       align-items: center;
       margin-bottom: 12px;
@@ -419,13 +406,13 @@
       });
     }
 
-    function shortenFileName(filename, maxLength = 15) {
+    function shortenFileName(filename, maxLength = 25) {
       const nameOnly = filename.replace(/\.[^/.]+$/, ""); // remove extension
       if (nameOnly.length <= maxLength) return nameOnly;
       return nameOnly.substring(0, maxLength - 3) + "...";
     }
 
-    function shortenFileNameWithExtension(filename, maxLength = 35) {
+    function shortenFileNameWithExtension(filename, maxLength = 25) {
       if (filename.length <= maxLength) return filename;
       const extIndex = filename.lastIndexOf('.');
       const ext = extIndex !== -1 ? filename.slice(extIndex) : '';
