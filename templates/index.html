@@ -181,6 +181,7 @@
     /* Cell alignment */
     .summary-block .name,
     .confirmation-block .name {
+      display: block;
       justify-self: start;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -540,7 +541,8 @@
         const lineTotal = (unit * qty).toFixed(2);
 
         row.innerHTML = `
-      <span class="cell name"      title="${model.filename}">${nameShort}</span>
+<span class="name" title="${model.filename}">${nameShort}</span>
+
       <span class="cell unit">${unit} Kč</span>
       <span class="cell times">×</span>
  <input
