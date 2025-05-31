@@ -535,14 +535,13 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = model.filename;
+        const nameShort = shortenFileName(model.filename, 35);
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
         const lineTotal = (unit * qty).toFixed(2);
 
         row.innerHTML = `
-<span class="name" title="${model.filename}">${nameShort}</span>
-
+      <span class="name" title="${model.filename}">${nameShort}</span>
       <span class="cell unit">${unit} Kč</span>
       <span class="cell times">×</span>
  <input
