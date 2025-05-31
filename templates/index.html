@@ -240,7 +240,7 @@
     }
 
     #dropZone.dragover {
-      background-color: #fffacd;
+      background-color: #f4f775;
     }
 
     #filePreviewContainer {
@@ -252,13 +252,13 @@
     }
 
     .file-preview {
+      position: relative;
       background-color: #e6e6e6;
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 6px 10px;
       font-size: 12px;
       font-family: 'Montserrat', sans-serif;
-      text-align: center;
       max-width: 100px;
       height: 40px;
       display: flex;
@@ -275,6 +275,22 @@
       background-color: #e6ccff;
       /* light purple */
     }
+
+    .file-preview .remove-icon {
+      position: absolute;
+      top: 2px;
+      right: 6px;
+      font-size: 14px;
+      color: red;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+
+    .file-preview:hover .remove-icon {
+      opacity: 0.5;
+      pointer-events: auto;
+    }
   </style>
 </head>
 
@@ -285,7 +301,7 @@
     <div class="upload-block active" id="uploadBlock">
 
       <div id="dropZone" style="border: 2px dashed #ccc; border-radius: 8px; padding: 30px; cursor: pointer;">
-        <p style="margin: 0;">Přetáhněte soubory sem nebo klikněte pro výběr</p>
+        <p style="margin: 0;">Sem přetáhněte soubory</p>
         <div id="filePreviewContainer"></div> <!-- Add this line -->
         <input type="file" id="fileInput" accept=".stl,.step,.stp" multiple style="display: none;">
       </div>
@@ -336,7 +352,11 @@
     const fileInput = document.getElementById('fileInput');
     const progressArea = document.getElementById('progressArea');
 
-    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('click', (e) => {
+      // prevent opening file dialog if clicking on file preview or remove icon
+      if (e.target.closest('.file-preview')) return;
+      fileInput.click();
+    });
 
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -452,15 +472,22 @@
             previewBox.className = 'file-preview';
             previewBox.title = file.name;
             previewBox.textContent = shortenFileName(file.name);
-            previewBox.onclick = () => {
-              // Remove from uploadedModels
-              uploadedModels = uploadedModels.filter(m => m.filename !== file.name);
 
-              // Remove tile and re-render
+            // Create a small ❌ icon
+            const removeIcon = document.createElement('span');
+            removeIcon.className = 'remove-icon';
+            removeIcon.textContent = '✖';
+            previewBox.appendChild(removeIcon);
+
+            // Click removes file
+            previewBox.onclick = () => {
+              uploadedModels = uploadedModels.filter(m => m.filename !== file.name);
               previewBox.remove();
               renderSummary();
             };
+
             document.getElementById('filePreviewContainer').appendChild(previewBox);
+
 
 
             uploadedModels.push({
