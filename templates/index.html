@@ -661,14 +661,24 @@
 
     function updateQuantity(index, value) {
       let qty = parseInt(value) || 1;
-      qty = Math.max(1, Math.min(qty, 999)); // restrict between 1 and 999
+
+      // Clamp value between 1 and 999
+      if (qty < 1) qty = 1;
+      if (qty > 999) qty = 999;
+
+      // Reflect corrected value back in the input field
+      const input = document.querySelectorAll('.summary-block .qty input')[index];
+      if (input) input.value = qty;
+
       uploadedModels[index].quantity = qty;
 
       const unit = uploadedModels[index].pricePerUnit;
       const newLineTotal = (unit * qty).toFixed(2);
       document.getElementById(`lineTotal${index}`).textContent = `${newLineTotal} Kč`;
+
       updateTotal();
     }
+
 
     function updateTotal() {
       // 1) compute the sum
