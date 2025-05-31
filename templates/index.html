@@ -176,6 +176,7 @@
       column-gap: 12px;
       align-items: center;
       margin-bottom: 12px;
+      padding: 4px 0;
     }
 
     /* Cell alignment */
@@ -234,8 +235,14 @@
     }
 
     .confirmation-block .remove {
-      visibility: hidden;
-      height: 1.2em;
+      width: 32px;
+      /* Same width as in .summary-block */
+      height: 1em;
+      /* Match visual size */
+      padding: 0;
+      margin: 0;
+      opacity: 0;
+      pointer-events: none;
     }
 
     #dropZone {
