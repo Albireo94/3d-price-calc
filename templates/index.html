@@ -444,6 +444,7 @@
 
       xhr.onload = function () {
         progressText.innerHTML = '';
+
         if (xhr.status === 200) {
           try {
             const data = JSON.parse(xhr.responseText);
@@ -454,39 +455,39 @@
             const resultDiv = document.createElement('div');
             resultDiv.className = 'result';
             resultDiv.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span>${shortName}</span>
-            <span style="font-weight: bold;">${price} Kč</span>
-          </div>`;
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span>${shortName}</span>
+          <span style="font-weight: bold;">${price} Kč</span>
+        </div>`;
             resultsContainer.appendChild(resultDiv);
 
-            // Show preview in dropZone
+            // Tile preview
             const previewBox = document.createElement('div');
             previewBox.className = 'file-preview';
             previewBox.title = file.name;
-            previewBox.textContent = shortenFileName(file.name);
+            previewBox.textContent = shortName;
 
-            // ❌ icon
             const removeIcon = document.createElement('span');
             removeIcon.className = 'remove-icon';
             removeIcon.textContent = '✖';
             previewBox.appendChild(removeIcon);
-
-            // Append tile
             document.getElementById('filePreviewContainer').appendChild(previewBox);
 
-            // Remove file + its summary
             previewBox.onclick = () => {
-              // 1. Remove model
               uploadedModels = uploadedModels.filter(m => m.filename !== file.name);
-
-              // 2. Remove tile
               previewBox.remove();
-
-              // 3. Clear summaries and update
               resultsContainer.innerHTML = "";
               renderSummary();
             };
+
+            // ✅ Store data for summary/confirmation
+            uploadedModels.push({
+              filename: file.name,
+              pricePerUnit: parseFloat(price),
+              quantity: 1
+            });
+
+            renderSummary();
 
           } catch (e) {
             const errorDiv = document.createElement('div');
@@ -495,11 +496,6 @@
             resultsContainer.appendChild(errorDiv);
             console.error(xhr.responseText);
           }
-        } else {
-          const errorDiv = document.createElement('div');
-          errorDiv.className = 'result';
-          errorDiv.innerHTML = `<span style="color:red">Chyba u souboru ${shortenFileName(file.name)}: ${xhr.responseText}</span>`;
-          resultsContainer.appendChild(errorDiv);
         }
       };
 
@@ -513,6 +509,7 @@
 
       xhr.send(formData);
     }
+
 
     function renderSummary() {
       summaryBlock.innerHTML = `
