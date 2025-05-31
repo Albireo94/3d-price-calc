@@ -240,7 +240,7 @@
     }
 
     #dropZone.dragover {
-      background-color: #e0f7fa;
+      background-color: #fffacd;
     }
 
     #filePreviewContainer {
@@ -267,6 +267,13 @@
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .file-preview:hover {
+      background-color: #e6ccff;
+      /* light purple */
     }
   </style>
 </head>
@@ -445,7 +452,16 @@
             previewBox.className = 'file-preview';
             previewBox.title = file.name;
             previewBox.textContent = shortenFileName(file.name);
+            previewBox.onclick = () => {
+              // Remove from uploadedModels
+              uploadedModels = uploadedModels.filter(m => m.filename !== file.name);
+
+              // Remove tile and re-render
+              previewBox.remove();
+              renderSummary();
+            };
             document.getElementById('filePreviewContainer').appendChild(previewBox);
+
 
             uploadedModels.push({
               filename: file.name,
