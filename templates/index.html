@@ -154,7 +154,6 @@
       margin-bottom: 12px;
       margin-left: 0;
       padding: 4px 12px 4px 12px;
-      background: rgba(0, 255, 0, 0.04);
     }
 
     .summary-block .name,
@@ -174,6 +173,7 @@
       justify-self: end;
       text-align: right;
       width: 80px;
+      white-space: nowrap;
     }
 
     .summary-block .times,
@@ -299,6 +299,15 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+    }
+
+    .file-preview.success {
+      border: 2px solid #4CAF50;
+      transition: border 0.3s ease-in;
+    }
+
+    .nowrap {
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -510,6 +519,9 @@
               const nameDiv = document.createElement('div');
               nameDiv.textContent = shortName;
               previewBox.insertBefore(nameDiv, removeIcon);
+
+              // ✅ Add green border after success
+              previewBox.classList.add('success');
             }, 500);
 
             renderSummary();
@@ -557,7 +569,9 @@
 />
 
       <span class="cell equals">=</span>
-      <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
+<span class="cell line-total" id="lineTotal${i}">
+  <span class="nowrap">${lineTotal} Kč</span>
+</span>
       <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
     `;
         summaryBlock.insertBefore(row, totalDiv);
