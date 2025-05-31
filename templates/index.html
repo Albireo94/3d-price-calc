@@ -171,7 +171,7 @@
         /* = symbol */
         minmax(80px, max-content)
         /* total price */
-        48px;
+        32px;
       /* trash icon */
       column-gap: 12px;
       align-items: center;
@@ -222,13 +222,15 @@
     }
 
     .summary-block .remove {
-      justify-self: center;
+      justify-self: end;
       background: none;
       border: none;
       cursor: pointer;
       font-size: 1.2em;
       line-height: 1;
       padding: 0;
+      padding-right: 10px;
+      margin-right: 4px;
     }
 
     .confirmation-block .remove {
@@ -300,7 +302,7 @@
     }
 
     .file-preview:hover .remove-icon {
-      opacity: 0.5;
+      opacity: 1;
       pointer-events: auto;
     }
   </style>
@@ -591,6 +593,7 @@
       <span class="cell qty">${qty}</span>
       <span class="cell equals">=</span>
       <span class="cell line-total">${lineTotal} Kč</span>
+      <span class="cell remove"></span>
       <button class="cell remove"></button>
     `;
         confirmationBlock.insertBefore(row, totalDiv);
