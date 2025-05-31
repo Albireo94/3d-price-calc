@@ -159,7 +159,7 @@
     .confirmation-block .upload-row {
       display: grid;
       grid-template-columns:
-        180px minmax(80px, max-content) 5px 50px 5px minmax(80px, max-content) 20px;
+        180px minmax(80px, max-content) auto 50px 5px minmax(80px, max-content) 20px;
       column-gap: 6px;
       align-items: center;
       margin-bottom: 12px;
@@ -196,7 +196,7 @@
       margin: 0;
       padding: 0;
       text-align: center;
-      width: 10px;
+      width: 5px;
     }
 
     .summary-block .qty input,
@@ -262,7 +262,6 @@
     #dropZone.dragover {
       background-color: #f4f775;
     }
-
 
     #filePreviewContainer {
       margin-top: 10px;
@@ -331,7 +330,7 @@
     <div class="upload-block active" id="uploadBlock">
 
       <div id="dropZone">
-        <p style="margin: 0;">Sem přetáhněte soubory</p>
+        <p style="margin: 0;">Sem přetáhněte STL/STP soubory</p>
         <div id="filePreviewContainer"></div> <!-- Add this line -->
         <input type="file" id="fileInput" accept=".stl,.step,.stp" multiple style="display: none;">
       </div>
