@@ -185,7 +185,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 350px;
+      max-width: 180px;
     }
 
     .summary-block .unit,
@@ -534,7 +534,7 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = shortenFileName(model.filename, 25);
+        const nameShort = model.filename;
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
         const lineTotal = (unit * qty).toFixed(2);
@@ -568,7 +568,7 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = shortenFileName(model.filename, 25);
+        const nameShort = model.filename;
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
         const lineTotal = (model.pricePerUnit * qty).toFixed(2);
