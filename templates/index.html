@@ -148,7 +148,7 @@
     .confirmation-block .upload-row {
       display: grid;
       grid-template-columns:
-        180px 80px auto 50px auto 1fr 24px;
+        180px 80px auto 50px auto 1fr 120px;
       column-gap: 2px;
       align-items: center;
       margin-bottom: 12px;
@@ -307,6 +307,28 @@
 
     .nowrap {
       white-space: nowrap;
+    }
+
+    .total-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .total-wrapper .line-total {
+      text-align: right;
+      white-space: nowrap;
+      flex-grow: 1;
+    }
+
+    .total-wrapper .remove {
+      font-size: 1.2em;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      line-height: 1;
     }
   </style>
 </head>
@@ -568,10 +590,12 @@
 />
 
       <span class="cell equals">=</span>
-<span class="cell line-total" id="lineTotal${i}">
-  <span class="nowrap">${lineTotal} Kč</span>
+<span class="cell total-wrapper">
+  <span class="line-total" id="lineTotal${i}">
+    <span class="nowrap">${lineTotal} Kč</span>
+  </span>
+  <button class="remove" onclick="removeModel(${i})">🗑️</button>
 </span>
-      <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
     `;
         summaryBlock.insertBefore(row, totalDiv);
       });
