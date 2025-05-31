@@ -407,11 +407,10 @@
 
     if (filename.length <= maxLength) {
       return filename;
-    }
 
-    const keepLength = maxLength - 3 - ext.length; // 3 for "..."
-    const shortened = name.substring(0, keepLength) + "..." + ext;
-    return shortened;
+      const keepLength = maxLength - 3 - ext.length; // 3 for "..."
+      const shortened = name.substring(0, keepLength) + "..." + ext;
+      return shortened;
     }
 
     function createUploadRow(index) {
