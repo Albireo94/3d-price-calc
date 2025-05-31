@@ -1,3 +1,4 @@
+<!-- BEGINNING OF HTML FILE -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +6,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Online kalkulačka</title>
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -33,12 +37,6 @@
       width: 600px;
     }
 
-    h2 {
-      margin-bottom: 20px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 20px;
-    }
-
     .upload-block,
     .summary-block,
     .confirmation-block,
@@ -53,14 +51,6 @@
       display: block;
     }
 
-    .upload-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      gap: 10px;
-    }
-
     button.upload-btn,
     .step-button {
       background: #fff000;
@@ -73,22 +63,9 @@
       transition: background 0.2s;
     }
 
-    .step-button {
-      color: black;
-    }
-
     button:hover {
       background: black;
       color: white;
-    }
-
-    button.upload-btn:disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
-
-    .container.wide .step-button {
-      margin: 20px 8px;
     }
 
     .divider {
@@ -98,12 +75,14 @@
     }
 
     .spinner {
-      border: 2px solid #f3f3f3;
-      border-top: 2px solid #4CAF50;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4CAF50;
       border-radius: 50%;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 5px;
     }
 
     @keyframes spin {
@@ -116,110 +95,6 @@
       }
     }
 
-    .upload-status {
-      margin-top: 4px;
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .total {
-      margin-top: 12px;
-      font-weight: bold;
-      border-top: 1px solid #ccc;
-      padding-top: 10px;
-      text-align: center;
-    }
-
-    .summary-block .upload-row,
-    .confirmation-block .upload-row {
-      display: grid;
-      grid-template-columns: 220px minmax(80px, max-content) auto 50px auto minmax(80px, max-content) 32px;
-      column-gap: 12px;
-      align-items: center;
-      margin-bottom: 12px;
-      padding: 4px 0;
-    }
-
-    .summary-block .name,
-    .confirmation-block .name {
-      display: block;
-      justify-self: start;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 100%;
-    }
-
-    .summary-block .unit,
-    .confirmation-block .unit,
-    .summary-block .times,
-    .confirmation-block .times,
-    .summary-block .equals,
-    .confirmation-block .equals,
-    .summary-block .line-total,
-    .confirmation-block .line-total {
-      justify-self: end;
-      white-space: nowrap;
-      text-align: right;
-    }
-
-    .summary-block .qty input,
-    .confirmation-block .qty input {
-      font-size: 14px;
-      padding: 0 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: white;
-      min-height: 34px;
-      height: 30px;
-    }
-
-    .summary-block .remove {
-      justify-self: end;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.2em;
-      padding: 0 10px 0 0;
-      margin-right: 5px;
-    }
-
-    .confirmation-block .remove {
-      width: 32px;
-      height: 1em;
-      padding: 0;
-      margin: 0;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    #dropZone {
-      border: 2px dashed #ccc;
-      border-radius: 8px;
-      padding: 30px;
-      cursor: pointer;
-      transition: background 0.3s, border 0.3s;
-    }
-
-    #dropZone:hover {
-      border: 2px solid black;
-    }
-
-    #dropZone.dragover {
-      background-color: #f4f775;
-    }
-
-    #filePreviewContainer {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: center;
-    }
-
     .file-preview {
       position: relative;
       background-color: #e6e6e6;
@@ -229,19 +104,14 @@
       height: 100px;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       font-size: 13px;
       padding: 8px;
+      box-sizing: border-box;
       text-align: center;
       overflow: hidden;
-      cursor: pointer;
-      transition: background 0.2s;
       word-break: break-word;
-    }
-
-    .file-preview:hover {
-      background-color: #e6ccff;
     }
 
     .file-preview .remove-icon {
@@ -253,31 +123,93 @@
       opacity: 0;
       transition: opacity 0.2s;
       pointer-events: none;
+      font-weight: bold;
     }
 
     .file-preview:hover .remove-icon {
       opacity: 0.9;
       pointer-events: auto;
-      font-weight: bold;
+    }
+
+    #filePreviewContainer {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .upload-status {
+      font-size: 12px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
     }
   </style>
 </head>
 
 <body>
-  <!-- Body unchanged for brevity -->
-  <script>
-    function uploadFile(file) {
-      const formData = new FormData();
-      formData.append('file', file);
+  <div class="container">
+    <h2 id="stepTitle">Nahrajte 3D modely</h2>
 
+    <div class="upload-block active" id="uploadBlock">
+      <div id="dropZone" onclick="fileInput.click()" style="border:2px dashed #ccc;padding:30px;border-radius:8px;">
+        <p style="margin: 0;">Sem přetáhněte soubory</p>
+        <div id="filePreviewContainer"></div>
+        <input type="file" id="fileInput" accept=".stl,.step,.stp" multiple style="display: none;">
+      </div>
+    </div>
+
+    <hr class="divider" />
+    <div id="resultsContainer"></div>
+    <div class="summary-block" id="summaryBlock">
+      <div id="totalPrice" class="total"></div>
+    </div>
+    <div class="confirmation-block" id="confirmationBlock"></div>
+    <div class="done-block" id="doneBlock">
+      <p>Poptávka byla odeslána!</p>
+    </div>
+
+    <div id="stepControls">
+      <button class="step-button" onclick="goBack()" id="backBtn" style="display:none">Zpět</button>
+      <button class="step-button" onclick="goNext()" id="nextBtn">Další</button>
+      <button class="step-button" onclick="startOver()" id="startOverBtn" style="display:none">Zpátky na
+        začátek</button>
+    </div>
+  </div>
+
+  <script>
+    const uploadedModels = [];
+    let currentStep = 1;
+    const fileInput = document.getElementById('fileInput');
+
+    fileInput.addEventListener('change', () => {
+      [...fileInput.files].forEach(file => {
+        if (!file.name.match(/\.(stl|step|stp)$/i)) {
+          return alert("Neplatný typ souboru: " + file.name);
+        }
+        if (uploadedModels.some(m => m.filename === file.name)) {
+          return alert("Soubor už byl nahrán: " + file.name);
+        }
+        uploadFile(file);
+      });
+    });
+
+    function shortenFileName(name, max = 25) {
+      if (name.length <= max) return name;
+      const ext = name.split('.').pop();
+      return name.slice(0, max - ext.length - 4) + '...' + '.' + ext;
+    }
+
+    function uploadFile(file) {
       const shortName = shortenFileName(file.name);
-      const previewBox = document.createElement('div');
-      previewBox.className = 'file-preview';
-      previewBox.id = `preview-${file.name}`;
-      previewBox.title = file.name;
+      const tile = document.createElement('div');
+      tile.className = 'file-preview';
+      tile.id = `preview-${file.name}`;
 
       const nameDiv = document.createElement('div');
       nameDiv.textContent = shortName;
+
       const statusDiv = document.createElement('div');
       statusDiv.className = 'upload-status';
       statusDiv.innerHTML = `<span class="spinner"></span><span class="percent">0%</span>`;
@@ -286,19 +218,19 @@
       removeIcon.className = 'remove-icon';
       removeIcon.textContent = '✖';
 
-      previewBox.append(nameDiv, statusDiv, removeIcon);
-      document.getElementById('filePreviewContainer').appendChild(previewBox);
-
       removeIcon.onclick = (e) => {
         e.stopPropagation();
         const index = uploadedModels.findIndex(m => m.filename === file.name);
         if (index !== -1) {
           uploadedModels.splice(index, 1);
-          document.getElementById(`preview-${file.name}`)?.remove();
+          tile.remove();
           document.getElementById(`result-${file.name}`)?.remove();
           renderSummary();
         }
       };
+
+      tile.append(nameDiv, statusDiv, removeIcon);
+      document.getElementById('filePreviewContainer').appendChild(tile);
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/upload", true);
@@ -306,34 +238,128 @@
       xhr.upload.onprogress = function (event) {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
-          const percentElem = document.querySelector(`#preview-${file.name} .percent`);
-          if (percentElem) {
-            percentElem.textContent = percent === 100 ? 'Zpracování...' : `${percent}%`;
-          }
+          tile.querySelector('.percent').textContent = percent === 100 ? 'Zpracování...' : `${percent}%`;
         }
       };
 
       xhr.onload = function () {
-        document.querySelector(`#preview-${file.name} .upload-status`)?.remove();
+        statusDiv.remove();
 
         if (xhr.status === 200) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            const price = data.price.toFixed(2);
+          const data = JSON.parse(xhr.responseText);
+          const price = data.price.toFixed(2);
+          uploadedModels.push({ filename: file.name, pricePerUnit: parseFloat(price), quantity: 1 });
 
-            uploadedModels.push({ filename: file.name, pricePerUnit: parseFloat(price), quantity: 1 });
-            renderSummary();
-          } catch (e) {
-            console.error('JSON error', xhr.responseText);
-          }
+          const result = document.createElement('div');
+          result.className = 'result';
+          result.id = `result-${file.name}`;
+          result.innerHTML = `
+            <div style="display:flex; justify-content:space-between;">
+              <span>${shortName}</span>
+              <span><strong>${price} Kč</strong></span>
+            </div>`;
+          document.getElementById('resultsContainer').appendChild(result);
+
+          renderSummary();
         }
       };
 
-      xhr.onerror = function () {
-        document.querySelector(`#preview-${file.name} .upload-status`)?.remove();
-      };
-
+      xhr.onerror = () => statusDiv.remove();
+      const formData = new FormData();
+      formData.append('file', file);
       xhr.send(formData);
+    }
+
+    function renderSummary() {
+      const summary = document.getElementById('summaryBlock');
+      const totalEl = document.getElementById('totalPrice');
+      summary.innerHTML = '<div id="totalPrice" class="total"></div>';
+
+      uploadedModels.forEach((model, i) => {
+        const row = document.createElement('div');
+        row.className = 'upload-row';
+        const total = (model.quantity * model.pricePerUnit).toFixed(2);
+        row.innerHTML = `
+          <span class="name" title="${model.filename}">${shortenFileName(model.filename, 35)}</span>
+          <span class="unit">${model.pricePerUnit.toFixed(2)} Kč</span>
+          <span class="times">×</span>
+          <input type="number" class="qty" min="1" value="${model.quantity}" oninput="updateQuantity(${i}, this.value)">
+          <span class="equals">=</span>
+          <span class="line-total" id="lineTotal${i}">${total} Kč</span>
+          <button class="remove" onclick="removeModel(${i})">🗑️</button>
+        `;
+        summary.insertBefore(row, totalEl);
+      });
+
+      updateTotal();
+    }
+
+    function updateQuantity(index, val) {
+      const qty = Math.max(1, parseInt(val) || 1);
+      uploadedModels[index].quantity = qty;
+      const total = (uploadedModels[index].pricePerUnit * qty).toFixed(2);
+      document.getElementById(`lineTotal${index}`).textContent = `${total} Kč`;
+      updateTotal();
+    }
+
+    function updateTotal() {
+      const sum = uploadedModels.reduce((sum, m) => sum + m.quantity * m.pricePerUnit, 0).toFixed(2);
+      document.getElementById('totalPrice').textContent = `Celková cena: ${sum} Kč`;
+    }
+
+    function removeModel(index) {
+      const name = uploadedModels[index].filename;
+      uploadedModels.splice(index, 1);
+      document.getElementById(`preview-${name}`)?.remove();
+      document.getElementById(`result-${name}`)?.remove();
+      renderSummary();
+    }
+
+    const container = document.querySelector('.container');
+    function goNext() {
+      if (currentStep === 1) {
+        container.classList.add('wide');
+        document.getElementById('resultsContainer').style.display = 'none';
+        document.getElementById('uploadBlock').classList.remove('active');
+        document.getElementById('summaryBlock').classList.add('active');
+        document.getElementById('stepTitle').textContent = "Zadejte množství a osobní informace";
+        document.getElementById('backBtn').style.display = 'inline-block';
+        currentStep++;
+      } else if (currentStep === 2) {
+        document.getElementById('summaryBlock').classList.remove('active');
+        document.getElementById('confirmationBlock').classList.add('active');
+        document.getElementById('stepTitle').textContent = "Potvrzení";
+        currentStep++;
+      } else if (currentStep === 3) {
+        document.getElementById('confirmationBlock').classList.remove('active');
+        document.getElementById('doneBlock').classList.add('active');
+        document.getElementById('stepTitle').textContent = "Hotovo";
+        document.getElementById('nextBtn').style.display = 'none';
+        document.getElementById('backBtn').style.display = 'none';
+        document.getElementById('startOverBtn').style.display = 'inline-block';
+        currentStep++;
+      }
+    }
+
+    function goBack() {
+      if (currentStep === 2) {
+        container.classList.remove('wide');
+        document.getElementById('summaryBlock').classList.remove('active');
+        document.getElementById('uploadBlock').classList.add('active');
+        document.getElementById('resultsContainer').style.display = 'block';
+        document.getElementById('stepTitle').textContent = "Nahrajte 3D modely";
+        document.getElementById('backBtn').style.display = 'none';
+        currentStep--;
+      } else if (currentStep === 3) {
+        document.getElementById('confirmationBlock').classList.remove('active');
+        document.getElementById('summaryBlock').classList.add('active');
+        document.getElementById('stepTitle').textContent = "Zadejte množství";
+        currentStep--;
+      }
+    }
+
+    function startOver() {
+      location.reload();
     }
   </script>
 </body>
