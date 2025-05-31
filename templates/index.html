@@ -453,17 +453,14 @@
       previewBox.id = `preview-${file.name}`;
       previewBox.title = file.name;
 
-      // Filename display
       const nameDiv = document.createElement('div');
       nameDiv.textContent = shortName;
 
-      // Upload status display
       const statusDiv = document.createElement('div');
       statusDiv.className = 'upload-status';
       statusDiv.style.marginTop = '8px';
       statusDiv.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span><span class="percent">0%</span>`;
 
-      // Remove icon
       const removeIcon = document.createElement('span');
       removeIcon.className = 'remove-icon';
       removeIcon.textContent = '✖';
@@ -471,7 +468,6 @@
       previewBox.append(nameDiv, statusDiv, removeIcon);
       document.getElementById('filePreviewContainer').appendChild(previewBox);
 
-      // Remove action
       removeIcon.onclick = (e) => {
         e.stopPropagation();
         const index = uploadedModels.findIndex(m => m.filename === file.name);
@@ -489,7 +485,7 @@
       xhr.upload.onprogress = function (event) {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
-          const percentElem = document.querySelector(`#preview-${file.name} .percent`);
+          const percentElem = previewBox.querySelector('.percent');
           if (percentElem) {
             percentElem.textContent = percent === 100 ? 'Zpracování...' : `${percent}%`;
           }
@@ -497,8 +493,6 @@
       };
 
       xhr.onload = function () {
-        statusDiv.remove();
-
         if (xhr.status === 200) {
           try {
             const data = JSON.parse(xhr.responseText);
@@ -510,9 +504,27 @@
               quantity: 1
             });
 
+            // ✅ Show bottom summary (price preview)
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result';
+            resultDiv.id = `result-${file.name}`;
+            resultDiv.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>${shortName}</span>
+            <span style="font-weight: bold;">${price} Kč</span>
+          </div>`;
+            resultsContainer.appendChild(resultDiv);
+
+            // ✅ Remove spinner/status after delay
+            setTimeout(() => {
+              statusDiv.remove();
+            }, 500);
+
             renderSummary();
+
           } catch (e) {
             console.error('JSON error', xhr.responseText);
+            statusDiv.innerHTML = '<span style="color:red; font-size: 12px;">Chyba při zpracování</span>';
           }
         }
       };
@@ -523,7 +535,6 @@
 
       xhr.send(formData);
     }
-
 
     function renderSummary() {
       summaryBlock.innerHTML = `
