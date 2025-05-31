@@ -232,7 +232,7 @@
     }
 
     .confirmation-block .remove {
-      display: none;
+      visibility: hidden;
     }
 
     #dropZone {
@@ -536,7 +536,7 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = shortenFileName(model.filename, 35);
+        const nameShort = shortenFileNameWithExtension(model.filename, 35);
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
         const lineTotal = (unit * qty).toFixed(2);
@@ -675,12 +675,23 @@
     }
 
     function removeModel(index) {
-      // remove from the array
+      const model = uploadedModels[index];
+
+      // 1. Odebrat z pole
       uploadedModels.splice(index, 1);
 
-      // re-render summary rows AND grand total
+      // 2. Odebrat dlaždici v dropzóně (Step 1)
+      const previewElement = document.getElementById(`preview-${model.filename}`);
+      if (previewElement) previewElement.remove();
+
+      // 3. Odebrat výsledek v dolní části Step 1
+      const resultElement = document.getElementById(`result-${model.filename}`);
+      if (resultElement) resultElement.remove();
+
+      // 4. Přegenerovat přehled (Step 2)
       renderSummary();
     }
+
   </script>
 </body>
 
