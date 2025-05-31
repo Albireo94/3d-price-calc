@@ -204,22 +204,20 @@
       text-align: right;
     }
 
-    .summary-block .qty,
+    .summary-block .qty input,
     .confirmation-block .qty {
-      justify-self: start;
-      /* Align cell content to the left in the grid */
-      display: flex;
-      /* Ensure vertical centering */
-      align-items: center;
-      /* Vertically center the number */
-      text-align: left;
-      /* Align number content to the left */
-      width: 100%;
-      /* Full width of the cell */
+      font-size: 14px;
+      font-family: inherit;
+      line-height: 1.2;
+      height: 32px;
+      padding: 0 6px;
+      margin: 0;
       box-sizing: border-box;
-      /* Prevent overflow */
-      height: auto;
-      /* Let it grow naturally */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: white;
+      display: flex;
+      align-items: center;
     }
 
     .summary-block .remove {
@@ -595,14 +593,14 @@
         const lineTotal = (model.pricePerUnit * qty).toFixed(2);
 
         row.innerHTML = `
-         <span class="cell name"      title="${model.filename}">${nameShort}</span>
+         <span class="cell name" title="${model.filename}">${nameShort}</span>
          <span class="cell unit">${unit} Kč</span>
          <span class="cell times">×</span>
-         <span class="cell qty">${qty}</span>
+         <input class="cell qty" type="text" value="${qty}" disabled />
          <span class="cell equals">=</span>
          <span class="cell line-total">${lineTotal} Kč</span>
-         <span class="cell remove"></span> <!-- Prázdná buňka jen kvůli zarovnání -->
-      `;
+         <span class="cell remove"></span>
+       `;
 
         confirmationBlock.insertBefore(row, totalDiv);
       });
