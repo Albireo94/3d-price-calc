@@ -85,7 +85,7 @@ def upload_file():
             else:
                 return jsonify({"error": "Unsupported file type"}), 400
 
-            price = volume * 0.10  # Simple pricing logic
+            price = volume * 2.9  # Simple pricing logic
             return jsonify({"volume": volume, "price": price})
 
         except Exception as e:

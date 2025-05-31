@@ -242,6 +242,32 @@
     #dropZone.dragover {
       background-color: #e0f7fa;
     }
+
+    #filePreviewContainer {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .file-preview {
+      background-color: #e6e6e6;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-family: 'Montserrat', sans-serif;
+      text-align: center;
+      max-width: 100px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
   </style>
 </head>
 
@@ -250,10 +276,13 @@
     <h2 id="stepTitle">Nahrajte 3D modely</h2>
 
     <div class="upload-block active" id="uploadBlock">
+
       <div id="dropZone" style="border: 2px dashed #ccc; border-radius: 8px; padding: 30px; cursor: pointer;">
         <p style="margin: 0;">Přetáhněte soubory sem nebo klikněte pro výběr</p>
+        <div id="filePreviewContainer"></div> <!-- Add this line -->
         <input type="file" id="fileInput" accept=".stl,.step,.stp" multiple style="display: none;">
       </div>
+
       <div id="progressArea"></div>
     </div>
 
@@ -411,6 +440,13 @@
           </div>`;
             resultsContainer.appendChild(resultDiv);
 
+            // Show preview in dropZone
+            const previewBox = document.createElement('div');
+            previewBox.className = 'file-preview';
+            previewBox.title = file.name;
+            previewBox.textContent = shortenFileName(file.name);
+            document.getElementById('filePreviewContainer').appendChild(previewBox);
+
             uploadedModels.push({
               filename: file.name,
               pricePerUnit: parseFloat(price),
@@ -521,7 +557,7 @@
         document.getElementById('resultsContainer').style.display = 'none';
         uploadBlock.classList.remove('active');
         summaryBlock.classList.add('active');
-        stepTitle.textContent = "Zadejte množství a osobní";
+        stepTitle.textContent = "Zadejte množství a osobní informace";
         backBtn.style.display = 'inline-block';
         currentStep++;
       } else if (currentStep === 2) {
