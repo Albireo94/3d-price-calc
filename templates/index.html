@@ -159,21 +159,20 @@
     .confirmation-block .upload-row {
       display: grid;
       grid-template-columns:
-        350px
-        /* filename */
+        180px
+        /* <-- filename column (fixed) */
         minmax(80px, max-content)
         /* unit price */
         auto
-        /* “×” */
-        80px
-        /* qty input */
+        /* × symbol */
+        60px
+        /* quantity input */
         auto
-        /* “=” */
-        minmax(100px, max-content)
-        /* line-total */
-        32px
-        /* trash or blank */
-      ;
+        /* = symbol */
+        minmax(80px, max-content)
+        /* total price */
+        32px;
+      /* trash icon */
       column-gap: 12px;
       align-items: center;
       margin-bottom: 12px;
