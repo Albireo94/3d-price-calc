@@ -191,6 +191,14 @@
       text-align: right;
     }
 
+    .summary-block .times,
+    .confirmation-block .times {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      width: 10px;
+    }
+
     .summary-block .qty input,
     .confirmation-block .qty input {
       font-size: 14px;
@@ -414,7 +422,7 @@
       });
     }
 
-    function shortenFileName(filename, maxLength = 25) {
+    function shortenFileName(filename, maxLength = 30) {
       const nameOnly = filename.replace(/\.[^/.]+$/, ""); // remove extension
       if (nameOnly.length <= maxLength) return nameOnly;
       return nameOnly.substring(0, maxLength - 3) + "...";
