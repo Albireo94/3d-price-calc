@@ -406,8 +406,8 @@
         }
 
         // prevent duplicate names
-        if (uploadedModels.some(m => m.filename === file.name)) {
-          return alert("Soubor už byl nahrán: " + file.name);
+        if (document.getElementById(`preview-${file.name}`)) {
+          return alert("Soubor už je právě nahráván nebo zobrazen: " + file.name);
         }
 
         uploadFile(file);
