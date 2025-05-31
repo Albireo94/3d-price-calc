@@ -441,6 +441,7 @@
       const formData = new FormData();
       formData.append('file', file);
 
+      const shortName = shortenFileName(file.name);
       const previewBox = document.createElement('div');
       previewBox.className = 'file-preview';
       previewBox.id = `preview-${file.name}`;
