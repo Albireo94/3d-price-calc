@@ -305,6 +305,14 @@
       pointer-events: auto;
       font-weight: bold;
     }
+
+    .upload-status {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
   </style>
 </head>
 
@@ -439,14 +447,41 @@
       const formData = new FormData();
       formData.append('file', file);
 
-      const progressText = document.createElement('div');
-      progressText.className = 'progress-text';
-      const spinner = document.createElement('span');
-      spinner.className = 'spinner';
-      progressText.appendChild(spinner);
-      const percentText = document.createTextNode(` 0%`);
-      progressText.appendChild(percentText);
-      progressArea.appendChild(progressText);
+      const shortName = shortenFileName(file.name);
+      const previewBox = document.createElement('div');
+      previewBox.className = 'file-preview';
+      previewBox.id = `preview-${file.name}`;
+      previewBox.title = file.name;
+
+      // Filename display
+      const nameDiv = document.createElement('div');
+      nameDiv.textContent = shortName;
+
+      // Upload status display
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'upload-status';
+      statusDiv.style.marginTop = '8px';
+      statusDiv.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span><span class="percent">0%</span>`;
+
+      // Remove icon
+      const removeIcon = document.createElement('span');
+      removeIcon.className = 'remove-icon';
+      removeIcon.textContent = '✖';
+
+      previewBox.append(nameDiv, statusDiv, removeIcon);
+      document.getElementById('filePreviewContainer').appendChild(previewBox);
+
+      // Remove action
+      removeIcon.onclick = (e) => {
+        e.stopPropagation();
+        const index = uploadedModels.findIndex(m => m.filename === file.name);
+        if (index !== -1) {
+          uploadedModels.splice(index, 1);
+          document.getElementById(`preview-${file.name}`)?.remove();
+          document.getElementById(`result-${file.name}`)?.remove();
+          renderSummary();
+        }
+      };
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", "/upload", true);
@@ -454,60 +489,21 @@
       xhr.upload.onprogress = function (event) {
         if (event.lengthComputable) {
           const percent = Math.round((event.loaded / event.total) * 100);
-          percentText.nodeValue = ` ${percent}%`;
-          if (percent === 100) {
-            percentText.nodeValue = ` 100% - Zpracování...`;
+          const percentElem = document.querySelector(`#preview-${file.name} .percent`);
+          if (percentElem) {
+            percentElem.textContent = percent === 100 ? 'Zpracování...' : `${percent}%`;
           }
         }
       };
 
       xhr.onload = function () {
-        progressText.innerHTML = '';
+        statusDiv.remove();
 
         if (xhr.status === 200) {
           try {
             const data = JSON.parse(xhr.responseText);
-            const volume = data.volume.toFixed(2);
             const price = data.price.toFixed(2);
-            const shortName = shortenFileName(file.name);
 
-            const resultDiv = document.createElement('div');
-            resultDiv.className = 'result';
-            resultDiv.id = `result-${file.name}`;
-
-            resultDiv.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>${shortName}</span>
-          <span style="font-weight: bold;">${price} Kč</span>
-        </div>`;
-            resultsContainer.appendChild(resultDiv);
-
-            // Tile preview
-            const previewBox = document.createElement('div');
-            previewBox.className = 'file-preview';
-            previewBox.id = `preview-${file.name}`;
-
-            previewBox.title = file.name;
-            previewBox.textContent = shortName;
-
-            const removeIcon = document.createElement('span');
-            removeIcon.className = 'remove-icon';
-            removeIcon.textContent = '✖';
-            previewBox.appendChild(removeIcon);
-            document.getElementById('filePreviewContainer').appendChild(previewBox);
-
-            removeIcon.onclick = (e) => {
-              e.stopPropagation(); // prevent previewBox click
-              const index = uploadedModels.findIndex(m => m.filename === file.name);
-              if (index !== -1) {
-                uploadedModels.splice(index, 1); // remove model
-                document.getElementById(`preview-${file.name}`)?.remove();
-                document.getElementById(`result-${file.name}`)?.remove();
-                renderSummary();
-              }
-            };
-
-            // ✅ Store data for summary/confirmation
             uploadedModels.push({
               filename: file.name,
               pricePerUnit: parseFloat(price),
@@ -515,27 +511,19 @@
             });
 
             renderSummary();
-
           } catch (e) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'result';
-            errorDiv.innerHTML = `<span style="color:red">Chyba při čtení JSON</span>`;
-            resultsContainer.appendChild(errorDiv);
-            console.error(xhr.responseText);
+            console.error('JSON error', xhr.responseText);
           }
         }
       };
 
       xhr.onerror = function () {
-        progressText.innerHTML = '';
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'result';
-        errorDiv.innerHTML = '<span style="color:red">Upload error</span>';
-        resultsContainer.appendChild(errorDiv);
+        statusDiv.innerHTML = '<span style="color:red; font-size: 12px;">Chyba při nahrávání</span>';
       };
 
       xhr.send(formData);
     }
+
 
     function renderSummary() {
       summaryBlock.innerHTML = `
