@@ -147,7 +147,7 @@
     .summary-block .upload-row,
     .confirmation-block .upload-row {
       display: grid;
-      grid-template-columns: 180px 120px 5px 10px 5px 110px 5px;
+      grid-template-columns: 180px 120px 0px 0px 0px 110px 5px;
       align-items: center;
       justify-items: center;
       margin-bottom: 12px;
@@ -162,7 +162,7 @@
       text-overflow: ellipsis;
       justify-self: start;
       max-width: 100%;
-      padding: 0px 8px;
+      padding-left: 10px;
     }
 
     .base-name {
@@ -191,7 +191,6 @@
     .summary-block .equals,
     .confirmation-block .equals {
       font-size: 14px;
-      line-height: 1;
     }
 
     /* Quantity input */
@@ -199,8 +198,6 @@
     .confirmation-block .qty input {
       width: 55px;
       height: 25px;
-      padding: 0px 2px;
-      line-height: 1;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -590,7 +587,6 @@
 
       updateTotal();
     }
-
 
     function renderConfirmation() {
       confirmationBlock.innerHTML = `
