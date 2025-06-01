@@ -335,20 +335,23 @@
     .summary-block .line-total {
       display: flex;
       justify-content: flex-end;
-      /* Ensures content is right-aligned */
       align-items: center;
       white-space: nowrap;
-      gap: 8px;
-      min-width: 110px;
-      /* Optional: set a consistent min size */
+      padding-left: 6px;
+      gap: 6px;
+      min-width: 120px;
+      max-width: 200px;
+      box-sizing: border-box;
     }
 
     .line-total .price-text {
       text-align: right;
+      font-weight: 500;
+      white-space: nowrap;
       flex-shrink: 0;
-      /* Prevent it from shrinking when space gets tight */
-      min-width: 80px;
-      /* Set a reliable space for the price */
+      width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .line-total .remove {
