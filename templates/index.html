@@ -334,21 +334,21 @@
 
     .summary-block .line-total {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
+      /* Ensures content is right-aligned */
       align-items: center;
-      max-width: 150px;
       white-space: nowrap;
-      padding-left: 6px;
       gap: 8px;
+      min-width: 110px;
+      /* Optional: set a consistent min size */
     }
 
     .line-total .price-text {
-      flex-grow: 1;
       text-align: right;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 500;
+      flex-shrink: 0;
+      /* Prevent it from shrinking when space gets tight */
+      min-width: 80px;
+      /* Set a reliable space for the price */
     }
 
     .line-total .remove {
