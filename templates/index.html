@@ -158,23 +158,23 @@
     /* File name */
     .summary-block .name,
     .confirmation-block .name {
+      display: flex;
       overflow: hidden;
       text-overflow: ellipsis;
       justify-self: start;
       max-width: 100%;
+      padding: 0px 15px;
     }
 
     .base-name {
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
       min-width: 0;
       flex-shrink: 1;
     }
 
     .extension {
       flex-shrink: 0;
-      margin-left: 2px;
     }
 
     /* Unit price and line total */
