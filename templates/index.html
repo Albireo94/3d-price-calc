@@ -164,6 +164,19 @@
       max-width: 100%;
     }
 
+    .base-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+
+    .extension {
+      flex-shrink: 0;
+      margin-left: 2px;
+    }
+
     /* Unit price and line total */
     .summary-block .unit,
     .confirmation-block .unit,
