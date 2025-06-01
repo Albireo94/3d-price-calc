@@ -299,6 +299,17 @@
       border: 2px solid #4CAF50;
       transition: border 0.3s ease-in;
     }
+
+    /*loading spinner model preview*/
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 
@@ -751,26 +762,70 @@
       const canvas = document.getElementById('stlCanvas');
       modal.style.display = 'block';
 
-      // Setup Three.js scene
+      // ✅ Spinner
+      const spinner = document.createElement('div');
+      spinner.id = 'loader';
+      spinner.style = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #555;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    z-index: 10001;
+  `;
+      modal.appendChild(spinner);
+
+      // ✅ Three.js setup
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ canvas });
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
       renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      renderer.setClearColor(0xffffff, 1);
 
-      const loader = new THREE.STLLoader();
-      loader.load(fileUrl, function (geometry) {
-        const material = new THREE.MeshNormalMaterial();
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
-        camera.position.z = 100;
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(1, 1, 1).normalize();
+      scene.add(light);
 
-        function animate() {
-          requestAnimationFrame(animate);
-          mesh.rotation.y += 0.01;
-          renderer.render(scene, camera);
+      const stlLoader = new THREE.STLLoader();
+      stlLoader.load(
+        fileUrl,
+        function (geometry) {
+          spinner.remove();
+
+          const material = new THREE.MeshNormalMaterial({ flatShading: true });
+          const mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+
+          const box = new THREE.Box3().setFromObject(mesh);
+          const center = box.getCenter(new THREE.Vector3());
+          mesh.position.sub(center); // center the mesh
+
+          camera.position.set(0, 0, box.getSize(new THREE.Vector3()).length() * 1.2);
+          camera.lookAt(0, 0, 0);
+
+          function animate() {
+            requestAnimationFrame(animate);
+            mesh.rotation.y += 0.01;
+            renderer.render(scene, camera);
+          }
+
+          animate();
+        },
+        undefined,
+        function (error) {
+          spinner.remove();
+          console.error("Chyba načítání STL:", error);
+          const errorMsg = document.createElement('div');
+          errorMsg.textContent = "Nepodařilo se načíst STL soubor.";
+          errorMsg.style.cssText = "color:red; text-align:center; padding-top:20px;";
+          modal.appendChild(errorMsg);
         }
-        animate();
-      });
+      );
     }
 
     function closeModal() {
