@@ -334,12 +334,21 @@
 
     .summary-block .line-total {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
-      text-align: right;
       white-space: nowrap;
-      font-weight: 500;
+      min-width: 100px;
+      max-width: 160px;
+      /* You can adjust this */
+      overflow: hidden;
+      text-align: right;
+    }
+
+    .line-total .price-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: right;
+      flex-grow: 1;
     }
   </style>
 </head>
@@ -603,7 +612,7 @@
       <span class="cell equals">=</span>
 
 <span class="cell line-total" id="lineTotal${i}">
-  <span class="nowrap">${lineTotal} Kč</span>
+  <span class="nowrap price-text">${lineTotal} Kč</span>
   <button class="remove" onclick="removeModel(${i})" title="Odebrat">🗑️</button>
 </span>
     `;
