@@ -8,10 +8,10 @@
 
   <!-- Import Montserrat font from Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <!--STL viewer-->
+  <!--STL viewer
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/STLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/STLLoader.js"></script>-->
 
   <!-- CSS Styles -->
   <style>
@@ -321,7 +321,7 @@
 
       <div id="dropZone">
         <p style="margin: 0;">Sem přetáhněte STL/STP soubory</p>
-        <div id="filePreviewContainer"></div> <!-- Add this line -->
+        <div id="filePreviewContainer"></div>
         <input type="file" id="fileInput" accept=".stl,.step,.stp" multiple style="display: none;">
       </div>
 
@@ -351,6 +351,81 @@
   </div>
 
   <!-- JavaScript -->
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+    import { STLLoader } from 'https://unpkg.com/three@0.158.0/examples/jsm/loaders/STLLoader.js';
+
+    window.openSTLViewer = function (fileUrl) {
+      const modal = document.getElementById('stlModal');
+      const canvas = document.getElementById('stlCanvas');
+      modal.style.display = 'block';
+
+      const spinner = document.createElement('div');
+      spinner.id = 'loader';
+      spinner.style = `
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #555;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+          z-index: 10001;
+        `;
+      modal.appendChild(spinner);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      renderer.setClearColor(0xffffff, 1);
+
+      const loader = new STLLoader();
+
+      loader.load(
+        fileUrl,
+        function (geometry) {
+          spinner.remove();
+
+          const material = new THREE.MeshNormalMaterial({ flatShading: true });
+          const mesh = new THREE.Mesh(geometry, material);
+          scene.add(mesh);
+
+          const light = new THREE.DirectionalLight(0xffffff, 1);
+          light.position.set(1, 1, 1).normalize();
+          scene.add(light);
+
+          const box = new THREE.Box3().setFromObject(mesh);
+          const center = box.getCenter(new THREE.Vector3());
+          mesh.position.sub(center);
+
+          camera.position.set(0, 0, box.getSize(new THREE.Vector3()).length() * 1.2);
+          camera.lookAt(0, 0, 0);
+
+          function animate() {
+            requestAnimationFrame(animate);
+            mesh.rotation.y += 0.01;
+            renderer.render(scene, camera);
+          }
+
+          animate();
+        },
+        undefined,
+        function (error) {
+          spinner.remove();
+          console.error("Chyba načítání STL:", error);
+          const errorMsg = document.createElement('div');
+          errorMsg.textContent = "Nepodařilo se načíst STL soubor.";
+          errorMsg.style.cssText = "color:red; text-align:center; padding-top:20px;";
+          modal.appendChild(errorMsg);
+        }
+      );
+    };
+  </script>
+
   <script>
     const MAX_FILES = 3;
     const uploadBlock = document.getElementById('uploadBlock');
@@ -730,8 +805,6 @@
       updateTotal();
     }
 
-
-
     function updateTotal() {
       // 1) compute the sum
       const sum = uploadedModels
@@ -757,81 +830,6 @@
 
       // Re-render summary step
       renderSummary();
-    }
-
-    function openSTLViewer(fileUrl) {
-      const modal = document.getElementById('stlModal');
-      const canvas = document.getElementById('stlCanvas');
-      modal.style.display = 'block';
-
-      const spinner = document.createElement('div');
-      spinner.id = 'loader';
-      spinner.style = `
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #555;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    z-index: 10001;
-  `;
-      modal.appendChild(spinner);
-
-      // ✅ Three.js setup
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-      renderer.setClearColor(0xffffff, 1);
-
-      const light = new THREE.DirectionalLight(0xffffff, 1);
-      light.position.set(1, 1, 1).normalize();
-      scene.add(light);
-
-      // ✅ Clear previous models before loading new one:
-      while (scene.children.length > 0) {
-        scene.remove(scene.children[0]);
-      }
-
-      const stlLoader = new THREE.STLLoader();
-      stlLoader.load(
-        fileUrl,
-        function (geometry) {
-          spinner.remove();
-
-          const material = new THREE.MeshNormalMaterial({ flatShading: true });
-          const mesh = new THREE.Mesh(geometry, material);
-          scene.add(mesh);
-
-          const box = new THREE.Box3().setFromObject(mesh);
-          const center = box.getCenter(new THREE.Vector3());
-          mesh.position.sub(center); // center the mesh
-
-          camera.position.set(0, 0, box.getSize(new THREE.Vector3()).length() * 1.2);
-          camera.lookAt(0, 0, 0);
-
-          function animate() {
-            requestAnimationFrame(animate);
-            mesh.rotation.y += 0.01;
-            renderer.render(scene, camera);
-          }
-
-          animate();
-        },
-        undefined,
-        function (error) {
-          spinner.remove();
-          console.error("Chyba načítání STL:", error);
-          const errorMsg = document.createElement('div');
-          errorMsg.textContent = "Nepodařilo se načíst STL soubor.";
-          errorMsg.style.cssText = "color:red; text-align:center; padding-top:20px;";
-          modal.appendChild(errorMsg);
-        }
-      );
     }
 
     function closeModal() {
