@@ -163,7 +163,7 @@
       text-overflow: ellipsis;
       justify-self: start;
       max-width: 100%;
-      padding: 0px 15px;
+      padding: 0px 10px;
     }
 
     .base-name {
@@ -207,6 +207,7 @@
       border-radius: 4px;
       background-color: white;
       box-sizing: border-box;
+      padding: 0px 10px;
     }
 
     /* Remove button */
@@ -582,21 +583,26 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = model.filename;
+        const nameShort = shortenFileNameWithExtension(model.filename, 35);
+        const dotIndex = model.filename.lastIndexOf(".");
+        const baseName = model.filename.slice(0, dotIndex);
+        const extension = model.filename.slice(dotIndex);
+
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
         const lineTotal = (model.pricePerUnit * qty).toFixed(2);
 
         row.innerHTML = `
-         <span class="cell name" title="${model.filename}">${nameShort}</span>
-         <span class="cell unit">${unit} Kč</span>
-         <span class="cell times">×</span>
-         <input class="cell qty" type="text" value="${qty}" disabled />
-         <span class="cell equals">=</span>
-         <span class="cell line-total">${lineTotal} Kč</span>
-         <span class="cell confirm-icon" title="Hotovo">✅</span>
-
-       `;
+  <span class="cell name" title="${model.filename}">
+    <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
+  </span>
+  <span class="cell unit">${unit} Kč</span>
+  <span class="cell times">×</span>
+  <input class="cell qty" type="text" value="${qty}" disabled />
+  <span class="cell equals">=</span>
+  <span class="cell line-total">${lineTotal} Kč</span>
+  <span class="cell confirm-icon" title="Hotovo">✅</span>
+`;
 
         confirmationBlock.insertBefore(row, totalDiv);
       });
