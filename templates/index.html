@@ -163,7 +163,7 @@
       text-overflow: ellipsis;
       justify-self: start;
       max-width: 100%;
-      padding: 0px 10px;
+      padding: 0px 8px;
     }
 
     .base-name {
@@ -497,7 +497,24 @@
             resultDiv.id = `result-${file.name}`;
             resultDiv.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span>${shortName}</span>
+            <span style="
+  display: flex;
+  max-width: 200px;
+  overflow: hidden;
+">
+  <span style="
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
+  ">
+    ${file.name.slice(0, file.name.lastIndexOf("."))}
+  </span>
+  <span style="flex-shrink: 0; margin-left: 2px;">
+    ${file.name.slice(file.name.lastIndexOf("."))}
+  </span>
+</span>
             <span style="font-weight: bold;">${price} Kč</span>
           </div>`;
             resultsContainer.appendChild(resultDiv);
