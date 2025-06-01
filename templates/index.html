@@ -619,21 +619,22 @@
       <span class="name" title="${model.filename}">${nameShort}</span>
       <span class="cell unit">${unit} Kč</span>
       <span class="cell times">×</span>
-<input
-  class="cell qty"
-  type="number"
-  min="1"
-  max="999"
-  value="${qty}"
-  oninput="updateQuantity(${i}, this)"
-/>
-
-      <span class="cell equals">=</span>
-
-      <span class="cell line-total" id="lineTotal${i}">
-  ${lineTotal} Kč
-</span>
-<button class="cell remove" onclick="removeModel(${i})" title="Odebrat">🗑️</button>
+<div class="upload-row">
+  <span class="cell name">${model.filename}</span>
+  <span class="cell unit">${unit} Kč</span>
+  <span class="cell times">×</span>
+  <input
+    class="cell qty"
+    type="number"
+    min="1"
+    max="999"
+    value="${qty}"
+    oninput="updateQuantity(${i}, this)"
+  />
+  <span class="cell equals">=</span>
+  <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
+  <button class="cell remove" onclick="removeModel(${i})" title="Odebrat">🗑️</button>
+</div>
 
     `;
         summaryBlock.insertBefore(row, totalDiv);
