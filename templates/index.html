@@ -310,10 +310,11 @@
     }
 
     .total-wrapper {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
+      display: grid;
+      grid-template-columns: 1fr auto;
       gap: 6px;
+      justify-content: end;
+      align-items: center;
     }
 
     .total-wrapper .line-total {
@@ -321,7 +322,6 @@
       white-space: nowrap;
       font-weight: 500;
     }
-
 
     .total-wrapper .remove {
       font-size: 1.2em;
