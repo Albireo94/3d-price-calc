@@ -150,8 +150,10 @@
       grid-template-columns: 180px 80px auto 50px auto 90px auto;
       column-gap: 2px;
       align-items: center;
-      padding: 4px 12px;
+      justify-items: center;
+      padding: 0px 12px;
       margin-bottom: 12px;
+      white-space: nowrap;
     }
 
     /* File name */
@@ -159,7 +161,6 @@
     .confirmation-block .name {
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
       justify-self: start;
     }
 
@@ -169,7 +170,6 @@
     .summary-block .line-total,
     .confirmation-block .line-total {
       text-align: right;
-      white-space: nowrap;
     }
 
     /* Symbols */
@@ -195,6 +195,7 @@
       border-radius: 4px;
       background-color: white;
       box-sizing: border-box;
+      justify-self: end;
     }
 
     /* Remove button */
