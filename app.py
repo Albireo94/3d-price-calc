@@ -48,7 +48,9 @@ app = Flask(__name__)
 
 @app.route('/uploads/<path:filename>')
 def serve_uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    ext = filename.rsplit('.', 1)[1].lower()
+    mimetype = 'application/sla' if ext == 'stl' else None
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype=mimetype)
 
 
 UPLOAD_FOLDER = 'uploads'
