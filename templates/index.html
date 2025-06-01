@@ -386,7 +386,7 @@
       });
     }
 
-    function shortenFileName(filename, maxLength = 30) {
+    function shortenFileName(filename, maxLength = 35) {
       const nameOnly = filename.replace(/\.[^/.]+$/, ""); // remove extension
       if (nameOnly.length <= maxLength) return nameOnly;
       return nameOnly.substring(0, maxLength - 3) + "...";
@@ -527,27 +527,32 @@
         row.className = 'upload-row';
 
         const nameShort = shortenFileNameWithExtension(model.filename, 35);
+        const dotIndex = model.filename.lastIndexOf(".");
+        const baseName = model.filename.slice(0, dotIndex);
+        const extension = model.filename.slice(dotIndex);
+
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
         const lineTotal = (unit * qty).toFixed(2);
 
         row.innerHTML = `
-      <span class="name" title="${model.filename}">${nameShort}</span>
-      <span class="cell unit">${unit} Kč</span>
-      <span class="cell times">×</span>
-<input
-  class="cell qty"
-  type="number"
-  min="1"
-  max="999"
-  value="${qty}"
-  oninput="updateQuantity(${i}, this)"
-/>
-
-      <span class="cell equals">=</span>
-      <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
-      <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
-    `;
+  <span class="name" title="${model.filename}">
+    <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
+  </span>
+  <span class="cell unit">${unit} Kč</span>
+  <span class="cell times">×</span>
+  <input
+    class="cell qty"
+    type="number"
+    min="1"
+    max="9999"
+    value="${qty}"
+    oninput="updateQuantity(${i}, this)"
+  />
+  <span class="cell equals">=</span>
+  <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
+  <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
+`;
         summaryBlock.insertBefore(row, totalDiv);
       });
 
@@ -647,9 +652,9 @@
     function updateQuantity(index, inputElem) {
       let qty = parseInt(inputElem.value) || 1;
 
-      // Clamp to 1–999
+      // Clamp to 1–9999
       if (qty < 1) qty = 1;
-      if (qty > 999) qty = 999;
+      if (qty > 9999) qty = 9999;
 
       // Set the corrected value back to the input
       inputElem.value = qty;
