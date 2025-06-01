@@ -147,10 +147,9 @@
     .summary-block .upload-row,
     .confirmation-block .upload-row {
       display: grid;
-      grid-template-columns: 180px 100px 8px 55px 8px 110px 20px;
+      grid-template-columns: 180px 120px 5px 10px 5px 110px 5px;
       align-items: center;
       justify-items: center;
-      padding: 0px;
       margin-bottom: 12px;
       white-space: nowrap;
     }
@@ -175,6 +174,7 @@
 
     .extension {
       flex-shrink: 0;
+      padding-left: 2px;
     }
 
     /* Unit price and line total */
@@ -198,16 +198,14 @@
     .summary-block .qty input,
     .confirmation-block .qty input {
       width: 55px;
-      height: 30px;
-      padding: 0px 4px;
+      height: 25px;
+      padding: 0px 2px;
       line-height: 1;
-      justify-self: end;
       font-size: 14px;
       border: 1px solid #ccc;
       border-radius: 4px;
       background-color: white;
       box-sizing: border-box;
-      padding: 0px 30px;
     }
 
     /* Remove button */
@@ -497,27 +495,28 @@
             resultDiv.className = 'result';
             resultDiv.id = `result-${file.name}`;
             resultDiv.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="
-  display: flex;
-  max-width: 250px;
-  overflow: hidden;
-">
-  <span style="
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex-shrink: 1;
-    min-width: 0;
-  ">
-    ${file.name.slice(0, file.name.lastIndexOf("."))}
-  </span>
-  <span style="flex-shrink: 0; margin-left: 2px;">
-    ${file.name.slice(file.name.lastIndexOf("."))}
-  </span>
-</span>
-            <span style="font-weight: bold;">${price} Kč</span>
-          </div>`;
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <span style="
+      display: flex;
+      max-width: 250px;
+      overflow: hidden;
+    ">
+      <span style="
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex-shrink: 1;
+        min-width: 0;
+      ">
+        ${file.name.slice(0, file.name.lastIndexOf("."))}
+      </span>
+      <span style="flex-shrink: 0; margin-left: 2px;">
+        ${file.name.slice(file.name.lastIndexOf("."))}
+      </span>
+    </span>
+    <span style="font-weight: bold;">${price} Kč</span>
+  </div>
+`;
             resultsContainer.appendChild(resultDiv);
 
             // ✅ Remove spinner/status after delay
@@ -533,6 +532,7 @@
             }, 500);
 
             renderSummary();
+
 
           } catch (e) {
             console.error('JSON error', xhr.responseText);
@@ -558,7 +558,6 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = shortenFileNameWithExtension(model.filename, 35);
         const dotIndex = model.filename.lastIndexOf(".");
         const baseName = model.filename.slice(0, dotIndex);
         const extension = model.filename.slice(dotIndex);
@@ -568,28 +567,30 @@
         const lineTotal = (unit * qty).toFixed(2);
 
         row.innerHTML = `
-  <span class="name" title="${model.filename}">
-    <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
-  </span>
-  <span class="cell unit">${unit} Kč</span>
-  <span class="cell times">×</span>
-  <input
-    class="cell qty"
-    type="number"
-    min="1"
-    max="9999"
-    value="${qty}"
-    oninput="updateQuantity(${i}, this)"
-  />
-  <span class="cell equals">=</span>
-  <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
-  <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
-`;
+      <span class="name" title="${model.filename}">
+        <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
+      </span>
+      <span class="cell unit">${unit} Kč</span>
+      <span class="cell times">×</span>
+      <span class="cell qty">
+        <input
+          type="number"
+          min="1"
+          max="9999"
+          value="${qty}"
+          oninput="updateQuantity(${i}, this)"
+        />
+      </span>
+      <span class="cell equals">=</span>
+      <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
+      <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
+    `;
         summaryBlock.insertBefore(row, totalDiv);
       });
 
       updateTotal();
     }
+
 
     function renderConfirmation() {
       confirmationBlock.innerHTML = `
@@ -601,37 +602,35 @@
         const row = document.createElement('div');
         row.className = 'upload-row';
 
-        const nameShort = shortenFileNameWithExtension(model.filename, 35);
         const dotIndex = model.filename.lastIndexOf(".");
         const baseName = model.filename.slice(0, dotIndex);
         const extension = model.filename.slice(dotIndex);
 
         const unit = model.pricePerUnit.toFixed(2);
         const qty = model.quantity;
-        const lineTotal = (model.pricePerUnit * qty).toFixed(2);
+        const lineTotal = (unit * qty).toFixed(2);
 
         row.innerHTML = `
-  <span class="cell name" title="${model.filename}">
-    <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
-  </span>
-  <span class="cell unit">${unit} Kč</span>
-  <span class="cell times">×</span>
-  <input class="cell qty" type="text" value="${qty}" disabled />
-  <span class="cell equals">=</span>
-  <span class="cell line-total">${lineTotal} Kč</span>
-  <span class="cell confirm-icon" title="Hotovo">✅</span>
-`;
-
+      <span class="cell name" title="${model.filename}">
+        <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
+      </span>
+      <span class="cell unit">${unit} Kč</span>
+      <span class="cell times">×</span>
+      <span class="cell qty">
+        <input type="text" value="${qty}" disabled />
+      </span>
+      <span class="cell equals">=</span>
+      <span class="cell line-total">${lineTotal} Kč</span>
+      <span class="cell confirm-icon" title="Hotovo">✅</span>
+    `;
         confirmationBlock.insertBefore(row, totalDiv);
       });
 
-      // ensure container is wide here too
       container.classList.add('wide');
-
-      // compute & show grand total
       const sum = uploadedModels.reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0).toFixed(2);
       totalDiv.textContent = `Celková cena: ${sum} Kč`;
     }
+
 
     const container = document.querySelector('.container');
     function goNext() {
