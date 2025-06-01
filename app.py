@@ -48,12 +48,12 @@ app = Flask(__name__)
 
 @app.route('/uploads/<path:filename>')
 def serve_uploaded_file(filename):
-    ext = filename.rsplit('.', 1)[1].lower()
-    mimetype = 'application/sla' if ext == 'stl' else None
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype=mimetype)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.path.join(os.path.dirname(
+    os.path.abspath(__file__)), 'uploads')
+
 ALLOWED_EXTENSIONS = {'stl', 'step', 'stp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -82,6 +82,9 @@ def upload_file():
     if file and allowed_file(file.filename):
         filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(filename)
+
+        print(f"Saved file to: {filename}")
+        print(f"File exists? {os.path.exists(filename)}")
 
         try:
             ext = file.filename.rsplit('.', 1)[1].lower()
