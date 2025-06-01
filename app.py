@@ -1,3 +1,4 @@
+from flask import send_from_directory
 from flask import Flask, request, render_template, jsonify
 import os
 import trimesh
@@ -43,6 +44,13 @@ def calculate_step_volume(filepath):
 
 
 app = Flask(__name__)
+
+
+@app.route('/uploads/<path:filename>')
+def serve_uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'stl', 'step', 'stp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -92,11 +100,6 @@ def upload_file():
             return jsonify({"error": f"Error processing the 3D model: {str(e)}"}), 500
 
     return jsonify({"error": "Invalid file type"}), 400
-
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 if __name__ == "__main__":
