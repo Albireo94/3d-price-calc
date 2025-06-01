@@ -148,7 +148,6 @@
     .confirmation-block .upload-row {
       display: grid;
       grid-template-columns: 180px 80px auto 50px auto 110px auto;
-      column-gap: 2px;
       align-items: center;
       justify-items: center;
       padding: 0px 12px;
@@ -162,7 +161,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       justify-self: start;
-      white-space: nowrap;
+      max-width: 100%;
     }
 
     /* Unit price and line total */
@@ -206,6 +205,7 @@
       border: none;
       font-size: 1.2em;
       line-height: 1;
+      justify-self: right;
     }
 
     #dropZone {
