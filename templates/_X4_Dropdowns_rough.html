@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online kalkulačka</title>
+
+    <!-- Import Montserrat font from Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS Styles -->
+    <style>
+      /* ===== Base page styles ===== */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: rgba(255, 255, 255, 0.8);
+        margin: 0;
+        padding: 60px 0 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        height: 80vh;
+      }
+
+      .container {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 400px;
+        max-width: 90%;
+        transition: width 0.3s ease;
+        text-align: center;
+      }
+
+      .container.wide {
+        width: 700px;
+      }
+
+      h2 {
+        margin-bottom: 20px;
+        font-family: "Montserrat", sans-serif;
+        font-size: 20px;
+      }
+
+      .upload-block,
+      .summary-block,
+      .confirmation-block,
+      .done-block {
+        display: none;
+      }
+
+      .upload-block.active,
+      .summary-block.active,
+      .confirmation-block.active,
+      .done-block.active {
+        display: block;
+      }
+
+      .upload-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 10px;
+      }
+
+      /* Buttons */
+      .step-button {
+        background: #fff000;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-family: "Montserrat", sans-serif;
+        font-weight: 525;
+        transition: background 0.2s;
+        color: black;
+      }
+
+      button:hover {
+        background: black;
+        color: white;
+      }
+
+      .container.wide .step-button {
+        margin: 20px 8px;
+      }
+
+      /* Divider */
+      .divider {
+        border: none;
+        border-top: 1px solid #ccc;
+        margin: 20px 0 10px;
+      }
+
+      /* Uploading files */
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4caf50;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .progress-text {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      /*Results*/
+      .result {
+        margin: 4px 0 10px;
+        font-weight: bold;
+      }
+
+      .total {
+        margin-top: 12px;
+        font-weight: bold;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+        text-align: center;
+      }
+
+      .summary-block .upload-row,
+      .confirmation-block .upload-row {
+        display: grid;
+        grid-template-columns: 180px 120px 0px 0px 0px 110px 5px;
+        align-items: center;
+        justify-items: center;
+        margin-bottom: 12px;
+        white-space: nowrap;
+      }
+
+      /* File name */
+      .summary-block .name,
+      .confirmation-block .name {
+        display: flex;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        justify-self: start;
+        max-width: 100%;
+        padding-left: 10px;
+      }
+
+      .base-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        flex-shrink: 1;
+      }
+
+      .extension {
+        flex-shrink: 0;
+        padding-left: 2px;
+      }
+
+      /* Unit price and line total */
+      .summary-block .unit,
+      .confirmation-block .unit,
+      .summary-block .line-total,
+      .confirmation-block .line-total {
+        justify-self: end;
+      }
+
+      /* Symbols */
+      .summary-block .times,
+      .confirmation-block .times,
+      .summary-block .equals,
+      .confirmation-block .equals {
+        font-size: 14px;
+      }
+
+      /* Quantity input */
+      .summary-block .qty input,
+      .confirmation-block .qty input {
+        width: 55px;
+        height: 25px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: white;
+        box-sizing: border-box;
+      }
+
+      /* Remove/Confirm button */
+      .summary-block .remove,
+      .confirmation-block .confirm-icon {
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-size: 1.2em;
+        line-height: 1;
+        justify-self: right;
+      }
+
+      /* Dropzone */
+      #dropZone {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        padding: 30px;
+        cursor: pointer;
+        transition: background 0.3s, border 0.3s;
+      }
+
+      #dropZone:hover {
+        border: 2px solid black;
+      }
+
+      #dropZone.dragover {
+        background-color: #f4f775;
+      }
+
+      /* Dlaždice */
+      #filePreviewContainer {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+      }
+
+      .file-preview {
+        position: relative;
+        background-color: #e6e6e6;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 100px;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Montserrat", sans-serif;
+        font-size: 13px;
+        padding: 8px;
+        box-sizing: border-box;
+        text-align: center;
+        overflow: hidden;
+        cursor: pointer;
+        transition: background 0.2s;
+        word-break: break-word;
+        flex-direction: column;
+      }
+
+      .file-preview:hover {
+        background-color: #e6ccff;
+      }
+
+      .file-preview .remove-icon {
+        position: absolute;
+        top: 4px;
+        right: 6px;
+        font-size: 14px;
+        color: red;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+      }
+
+      .file-preview:hover .remove-icon {
+        opacity: 0.9;
+        pointer-events: auto;
+        font-weight: bold;
+      }
+
+      .upload-status {
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .file-preview.success {
+        border: 2px solid #4caf50;
+        transition: border 0.3s ease-in;
+      }
+
+      /* DROPDOWNS */
+      .dropdown-group {
+        display: grid;
+        justify-content: center;
+        grid-template-columns: repeat(2, 160px);
+        gap: 30px;
+        margin: 20px 0;
+      }
+
+      .dropdown-tile {
+        background-color: #fff000;
+        color: rgb(0, 0, 0);
+        border-radius: 8px;
+        padding: 12px 16px;
+        position: relative;
+        font-family: "Montserrat", sans-serif;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        width: 160px;
+        height: 60px;
+        box-sizing: border-box;
+      }
+
+      .dropdown-tile label {
+        font-size: 12px;
+        opacity: 0.8;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .dropdown-tile select,
+      .dropdown-tile input {
+        background: transparent;
+        border: none;
+        color: rgb(0, 0, 0);
+        font-size: 16px;
+        width: 100%;
+        outline: none;
+        appearance: none;
+      }
+
+      .dropdown-tile select option {
+        color: black;
+      }
+
+      /*.dropdown-tile::after {
+        content: "▼";
+        position: absolute;
+        right: 16px;
+        top: 32px;
+        pointer-events: none;
+        font-size: 12px;
+      }*/
+
+      .dropdown-tile input[type="number"] {
+        background: rgb(255, 255, 255);
+        color: black;
+        border-radius: 6px;
+        padding: 6px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h2 id="stepTitle">Nahrajte 3D modely</h2>
+
+      <div class="upload-block active" id="uploadBlock">
+        <div id="dropZone">
+          <p style="margin: 0">Sem přetáhněte STL/STP soubory</p>
+          <div id="filePreviewContainer"></div>
+          <input
+            type="file"
+            id="fileInput"
+            accept=".stl,.step,.stp"
+            multiple
+            style="display: none"
+          />
+        </div>
+
+        <div id="progressArea"></div>
+      </div>
+
+      <!-- Dropdown Inputs -->
+      <div id="dropdownBlock" class="dropdown-group">
+        <div class="dropdown-tile">
+          <label for="pevnost">Pevnost</label>
+          <select id="pevnost">
+            <option selected disabled>Bude pouze vystaveno</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+          </select>
+        </div>
+
+        <div class="dropdown-tile">
+          <label for="barva">Barva</label>
+          <select id="barva">
+            <option selected disabled>Černá</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+          </select>
+        </div>
+
+        <div class="dropdown-tile">
+          <label for="material">Materiál</label>
+          <select id="material">
+            <option selected disabled>Nechám si poradit</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+          </select>
+        </div>
+
+        <div class="dropdown-tile">
+          <label for="pouziti">Použití</label>
+          <select id="pouziti">
+            <option selected disabled>Uvnitř</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+          </select>
+        </div>
+
+        <div class="dropdown-tile">
+          <label for="kvalita">Kvalita</label>
+          <select id="kvalita">
+            <option selected disabled>Bude umístěno uvnitř</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+          </select>
+        </div>
+
+        <div class="dropdown-tile">
+          <label for="quantity">Počet kusů</label>
+          <input type="number" id="quantity" value="1" min="1" />
+        </div>
+      </div>
+
+      <hr class="divider" />
+      <div id="resultsContainer"></div>
+
+      <div class="summary-block" id="summaryBlock">
+        <div id="totalPrice" class="total"></div>
+      </div>
+
+      <div class="confirmation-block" id="confirmationBlock"></div>
+
+      <div class="done-block" id="doneBlock">
+        <p>Poptávka byla odeslána!</p>
+      </div>
+
+      <div id="stepControls">
+        <button
+          class="step-button"
+          onclick="goBack()"
+          id="backBtn"
+          style="display: none"
+        >
+          Zpět
+        </button>
+        <button class="step-button" onclick="goNext()" id="nextBtn">
+          Další
+        </button>
+        <button
+          class="step-button"
+          onclick="startOver()"
+          id="startOverBtn"
+          style="display: none"
+        >
+          Zpátky na začátek
+        </button>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="module">
+      const MAX_FILES = 3;
+      const uploadBlock = document.getElementById("uploadBlock");
+      const resultsContainer = document.getElementById("resultsContainer");
+      const totalPriceDisplay = document.getElementById("totalPrice");
+      const stepTitle = document.getElementById("stepTitle");
+      const summaryBlock = document.getElementById("summaryBlock");
+      const doneBlock = document.getElementById("doneBlock");
+      const nextBtn = document.getElementById("nextBtn");
+      const backBtn = document.getElementById("backBtn");
+      const startOverBtn = document.getElementById("startOverBtn");
+
+      let totalPrice = 0;
+      let currentStep = 1;
+      let uploadedModels = [];
+
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("fileInput");
+      const progressArea = document.getElementById("progressArea");
+
+      dropZone.addEventListener("click", (e) => {
+        // prevent opening file dialog if clicking on file preview or remove icon
+        if (e.target.closest(".file-preview")) return;
+        fileInput.click();
+      });
+
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("dragover");
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        handleFiles(e.dataTransfer.files);
+      });
+
+      fileInput.addEventListener("change", () => {
+        handleFiles(fileInput.files);
+      });
+
+      function handleFiles(files) {
+        [...files].forEach((file) => {
+          if (!file.name.match(/\.(stl|step|stp)$/i)) {
+            return alert("Neplatný typ souboru: " + file.name);
+          }
+
+          // prevent duplicate names
+          if (document.getElementById(`preview-${file.name}`)) {
+            return alert(
+              "Soubor už je právě nahráván nebo zobrazen: " + file.name
+            );
+          }
+
+          uploadFile(file);
+        });
+      }
+
+      function shortenFileName(filename, maxLength = 35) {
+        const nameOnly = filename.replace(/\.[^/.]+$/, ""); // remove extension
+        if (nameOnly.length <= maxLength) return nameOnly;
+        return nameOnly.substring(0, maxLength - 3) + "...";
+      }
+
+      function shortenFileNameWithExtension(filename, maxLength = 25) {
+        if (filename.length <= maxLength) return filename;
+        const extIndex = filename.lastIndexOf(".");
+        const ext = extIndex !== -1 ? filename.slice(extIndex) : "";
+        const nameOnly = filename.slice(0, maxLength - ext.length - 3);
+        return nameOnly + "..." + ext;
+      }
+
+      function uploadFile(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const shortName = shortenFileName(file.name);
+        const previewBox = document.createElement("div");
+        previewBox.className = "file-preview";
+        previewBox.id = `preview-${file.name}`;
+        previewBox.title = file.name;
+
+        const statusDiv = document.createElement("div");
+        statusDiv.className = "upload-status";
+        statusDiv.innerHTML = `
+  <span class="spinner" style="width:14px;height:14px;border-width:2px;"></span>
+  <span class="percent">0%</span>
+`;
+
+        const removeIcon = document.createElement("span");
+        removeIcon.className = "remove-icon";
+        removeIcon.textContent = "✖";
+
+        previewBox.append(statusDiv, removeIcon);
+
+        document.getElementById("filePreviewContainer").appendChild(previewBox);
+
+        removeIcon.onclick = (e) => {
+          e.stopPropagation();
+          const index = uploadedModels.findIndex(
+            (m) => m.filename === file.name
+          );
+          if (index !== -1) {
+            uploadedModels.splice(index, 1);
+            document.getElementById(`preview-${file.name}`)?.remove();
+            document.getElementById(`result-${file.name}`)?.remove();
+            renderSummary();
+          }
+        };
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/upload", true);
+
+        xhr.upload.onprogress = function (event) {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            const percentElem = previewBox.querySelector(".percent");
+            if (percentElem) {
+              percentElem.textContent =
+                percent === 100 ? "Pracuji..." : `${percent}%`;
+            }
+          }
+        };
+
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              const price = data.price.toFixed(2);
+
+              uploadedModels.push({
+                filename: file.name,
+                pricePerUnit: parseFloat(price),
+                quantity: 1,
+              });
+
+              // ✅ Show bottom summary (price preview)
+              const resultDiv = document.createElement("div");
+              resultDiv.className = "result";
+              resultDiv.id = `result-${file.name}`;
+              resultDiv.innerHTML = `
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <span style="
+      display: flex;
+      max-width: 250px;
+      overflow: hidden;
+    ">
+      <span style="
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex-shrink: 1;
+        min-width: 0;
+      ">
+        ${file.name.slice(0, file.name.lastIndexOf("."))}
+      </span>
+      <span style="flex-shrink: 0; margin-left: 2px;">
+        ${file.name.slice(file.name.lastIndexOf("."))}
+      </span>
+    </span>
+    <span style="font-weight: bold;">${price} Kč</span>
+  </div>
+`;
+              resultsContainer.appendChild(resultDiv);
+
+              // ✅ Remove spinner/status after delay
+
+              setTimeout(() => {
+                statusDiv.remove();
+
+                const nameDiv = document.createElement("div");
+                nameDiv.innerHTML = `
+    <div style="font-size: 13px; text-align: center;">
+      <div>${shortName}</div>
+      <div style="font-size: 11px; opacity: 0.6;">${file.name.slice(
+        file.name.lastIndexOf(".")
+      )}</div>
+    </div>
+  `;
+                previewBox.insertBefore(nameDiv, removeIcon);
+
+                previewBox.classList.add("success");
+              }, 500);
+
+              renderSummary();
+            } catch (e) {
+              console.error("JSON error", xhr.responseText);
+              statusDiv.innerHTML =
+                '<span style="color:red; font-size: 12px;">Chyba při zpracování</span>';
+            }
+          }
+        };
+
+        xhr.onerror = function () {
+          statusDiv.innerHTML =
+            '<span style="color:red; font-size: 12px;">Chyba při nahrávání</span>';
+        };
+
+        xhr.send(formData);
+      }
+
+      function renderSummary() {
+        summaryBlock.innerHTML = `
+    <div id="totalPrice" class="total"></div>
+  `;
+        const totalDiv = document.getElementById("totalPrice");
+
+        uploadedModels.forEach((model, i) => {
+          const row = document.createElement("div");
+          row.className = "upload-row";
+
+          const dotIndex = model.filename.lastIndexOf(".");
+          const baseName = model.filename.slice(0, dotIndex);
+          const extension = model.filename.slice(dotIndex);
+
+          const unit = model.pricePerUnit.toFixed(2);
+          const qty = model.quantity;
+          const lineTotal = (unit * qty).toFixed(2);
+
+          row.innerHTML = `
+      <span class="name" title="${model.filename}">
+        <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
+      </span>
+      <span class="cell unit">${unit} Kč</span>
+      <span class="cell times">×</span>
+      <span class="cell qty">
+        <input
+          type="number"
+          min="1"
+          max="9999"
+          value="${qty}"
+          oninput="updateQuantity(${i}, this)"
+        />
+      </span>
+      <span class="cell equals">=</span>
+      <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
+      <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
+    `;
+          summaryBlock.insertBefore(row, totalDiv);
+        });
+
+        updateTotal();
+      }
+
+      function renderConfirmation() {
+        confirmationBlock.innerHTML = `
+    <div id="confirmTotal" class="total"></div>
+  `;
+        const totalDiv = document.getElementById("confirmTotal");
+
+        uploadedModels.forEach((model, i) => {
+          const row = document.createElement("div");
+          row.className = "upload-row";
+
+          const dotIndex = model.filename.lastIndexOf(".");
+          const baseName = model.filename.slice(0, dotIndex);
+          const extension = model.filename.slice(dotIndex);
+
+          const unit = model.pricePerUnit.toFixed(2);
+          const qty = model.quantity;
+          const lineTotal = (unit * qty).toFixed(2);
+
+          row.innerHTML = `
+      <span class="cell name" title="${model.filename}">
+        <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
+      </span>
+      <span class="cell unit">${unit} Kč</span>
+      <span class="cell times">×</span>
+      <span class="cell qty">
+        <input type="text" value="${qty}" disabled />
+      </span>
+      <span class="cell equals">=</span>
+      <span class="cell line-total">${lineTotal} Kč</span>
+      <span class="cell confirm-icon" title="Hotovo">✅</span>
+    `;
+          confirmationBlock.insertBefore(row, totalDiv);
+        });
+
+        container.classList.add("wide");
+        const sum = uploadedModels
+          .reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0)
+          .toFixed(2);
+        totalDiv.textContent = `Celková cena: ${sum} Kč`;
+      }
+
+      const container = document.querySelector(".container");
+      function goNext() {
+        if (currentStep === 1) {
+          // Prevent going to next step without files
+          if (uploadedModels.length === 0) {
+            alert("Nahrajte prosím alespoň jeden soubor.");
+            return;
+          }
+
+          // Step 1 → Step 2: widen card
+          document.getElementById("dropdownBlock").style.display = "none";
+          container.classList.add("wide");
+          document.getElementById("resultsContainer").style.display = "none";
+          uploadBlock.classList.remove("active");
+          summaryBlock.classList.add("active");
+          stepTitle.textContent = "Zadejte množství a osobní informace";
+          backBtn.style.display = "inline-block";
+          currentStep++;
+        } else if (currentStep === 2) {
+          confirmationBlock.classList.add("active");
+          summaryBlock.classList.remove("active");
+          stepTitle.textContent = "Potvrzení";
+          renderConfirmation();
+          currentStep++;
+        } else if (currentStep === 3) {
+          confirmationBlock.classList.remove("active");
+          doneBlock.classList.add("active");
+          stepTitle.textContent = "Hotovo";
+          nextBtn.style.display = "none";
+          backBtn.style.display = "none";
+          startOverBtn.style.display = "inline-block";
+          currentStep++;
+        }
+      }
+
+      function goBack() {
+        if (currentStep === 2) {
+          // Step 2 → Step 1: shrink card
+          container.classList.remove("wide");
+          summaryBlock.classList.remove("active");
+          uploadBlock.classList.add("active");
+          document.getElementById("dropdownBlock").style.display = "grid";
+          document.getElementById("resultsContainer").style.display = "block";
+          stepTitle.textContent = "Nahrajte 3D modely";
+          backBtn.style.display = "none";
+          currentStep--;
+        } else if (currentStep === 3) {
+          // Step 3 → Step 2
+          confirmationBlock.classList.remove("active");
+          summaryBlock.classList.add("active");
+          stepTitle.textContent = "Zadejte množství";
+          currentStep--;
+        }
+      }
+
+      function startOver() {
+        location.reload();
+      }
+
+      function updateQuantity(index, inputElem) {
+        let qty = parseInt(inputElem.value) || 1;
+
+        // Clamp to 1–9999
+        if (qty < 1) qty = 1;
+        if (qty > 9999) qty = 9999;
+
+        // Set the corrected value back to the input
+        inputElem.value = qty;
+
+        uploadedModels[index].quantity = qty;
+
+        const unit = uploadedModels[index].pricePerUnit;
+        const newLineTotal = (unit * qty).toFixed(2);
+        document.getElementById(
+          `lineTotal${index}`
+        ).textContent = `${newLineTotal} Kč`;
+
+        updateTotal();
+      }
+
+      function updateTotal() {
+        // 1) compute the sum
+        const sum = uploadedModels
+          .reduce((acc, m) => acc + m.pricePerUnit * m.quantity, 0)
+          .toFixed(2);
+
+        // 2) find the placeholder and write it
+        const totalPriceDisplay = document.getElementById("totalPrice");
+        if (totalPriceDisplay) {
+          totalPriceDisplay.textContent = `Celková cena: ${sum} Kč`;
+        }
+      }
+
+      function removeModel(index) {
+        const filename = uploadedModels[index].filename;
+
+        // Remove from the array
+        uploadedModels.splice(index, 1);
+
+        // Remove from upload step (tile + result below drop zone)
+        document.getElementById(`preview-${filename}`)?.remove();
+        document.getElementById(`result-${filename}`)?.remove();
+
+        // Re-render summary step
+        renderSummary();
+      }
+
+      window.goNext = goNext;
+      window.goBack = goBack;
+      window.startOver = startOver;
+    </script>
+  </body>
+</html>
