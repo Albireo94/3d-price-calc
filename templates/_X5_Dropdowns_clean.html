@@ -710,7 +710,6 @@
       const totalPriceDisplay = document.getElementById("totalPrice");
       const stepTitle = document.getElementById("stepTitle");
       const summaryBlock = document.getElementById("summaryBlock");
-      const confirmationBlock = document.getElementById("confirmationBlock");
       const doneBlock = document.getElementById("doneBlock");
       const nextBtn = document.getElementById("nextBtn");
       const backBtn = document.getElementById("backBtn");
@@ -1003,7 +1002,7 @@
           }
 
           // Step 1 → Step 2: widen card
-          //document.getElementById("dropdownBlock").style.display = "none";
+          document.getElementById("dropdownBlock").style.display = "none";
           container.classList.add("wide");
           document.getElementById("resultsContainer").style.display = "none";
           uploadBlock.classList.remove("active");
@@ -1031,9 +1030,10 @@
       function goBack() {
         if (currentStep === 2) {
           // Step 2 → Step 1: shrink card
-          //document.getElementById("dropdownBlock").style.display = "grid";          container.classList.remove("wide");
+          container.classList.remove("wide");
           summaryBlock.classList.remove("active");
           uploadBlock.classList.add("active");
+          document.getElementById("dropdownBlock").style.display = "grid";
           document.getElementById("resultsContainer").style.display = "block";
           stepTitle.textContent = "Nahrajte 3D modely";
           backBtn.style.display = "none";
