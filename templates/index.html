@@ -1031,7 +1031,8 @@
       function goBack() {
         if (currentStep === 2) {
           // Step 2 → Step 1: shrink card
-          //document.getElementById("dropdownBlock").style.display = "grid";          container.classList.remove("wide");
+          //document.getElementById("dropdownBlock").style.display = "grid";
+          container.classList.remove("wide");
           summaryBlock.classList.remove("active");
           uploadBlock.classList.add("active");
           document.getElementById("resultsContainer").style.display = "block";
