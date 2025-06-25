@@ -79,6 +79,7 @@
         font-weight: 525;
         transition: background 0.2s;
         color: black;
+        margin: 20px 10px;
       }
 
       button:hover {
@@ -94,7 +95,7 @@
       .divider {
         border: none;
         border-top: 1px solid #ccc;
-        margin: 20px 0 10px;
+        margin: 10px 0 10px;
       }
 
       /* Uploading files */
@@ -304,15 +305,15 @@
       }
 
       /*@media (min-width: 520px) {
-        .dropdown-group {
-          grid-template-columns: 1fr 1fr;
+          .dropdown-group {
+            grid-template-columns: 1fr 1fr;
+          }
         }
-      }
-      @media (min-width: 900px) {
-        .dropdown-group {
-          grid-template-columns: 1fr 1fr 1fr;
-        }
-      }*/
+        @media (min-width: 900px) {
+          .dropdown-group {
+            grid-template-columns: 1fr 1fr 1fr;
+          }
+        }*/
 
       .dropdown-tile {
         background-color: #fff000;
@@ -514,7 +515,6 @@
   <body>
     <div class="container">
       <h2 id="stepTitle">Nahrajte 3D modely</h2>
-
       <div class="upload-block active" id="uploadBlock">
         <div id="dropZone">
           <p style="margin: 0">Sem přetáhněte STL/STP soubory</p>
@@ -526,13 +526,11 @@
             multiple
             style="display: none"
           />
+          <div id="progressArea"></div>
         </div>
-        <div id="progressArea"></div>
       </div>
 
-      <!-- Dropdown Inputs -->
-
-      <div class="custom-grid">
+      <div id="dropdownBlock" class="custom-grid">
         <div class="dropdown-tile" style="grid-row: 1; grid-column: 1">
           <span class="select-label">Primární účel</span>
           <span class="select-value">Dekorace</span>
@@ -605,10 +603,6 @@
           </select>
         </div>
         <div id="environmentChecks" style="grid-row: 3; grid-column: 2">
-          <!-- <label
-            ><input type="checkbox" name="env" value="interiér" />
-            interiér</label
-          >-->
           <label
             ><input type="checkbox" name="env" value="exteriér" /> exteriérové
             použití</label
@@ -625,29 +619,13 @@
             ><input type="checkbox" name="env" value="nízké teploty" /> nízké
             teploty</label
           >
-          <!--<label
-            ><input type="checkbox" name="env" value="chemicky agresivní" />
-            chemicky agresivní</label
-          >-->
           <label
             ><input type="checkbox" name="env" value="kontakt s potravinami" />
             kontakt s potravinami</label
           >
         </div>
       </div>
-      <!-- Textarea for notes -->
-      <div class="notes-field">
-        <!--<label
-          for="notes"
-          style="
-            display: block;
-            text-align: left;
-            margin-bottom: 4px;
-            font-size: 14px;
-            opacity: 0.8;
-          "
-          >Doplňující informace:</label
-        >-->
+      <div class="notes-field" id="notesField">
         <textarea
           id="notes"
           name="notes"
@@ -658,17 +636,13 @@
 
       <hr class="divider" />
       <div id="resultsContainer"></div>
-
       <div class="summary-block" id="summaryBlock">
         <div id="totalPrice" class="total"></div>
       </div>
-
       <div class="confirmation-block" id="confirmationBlock"></div>
-
       <div class="done-block" id="doneBlock">
         <p>Poptávka byla odeslána!</p>
       </div>
-
       <div
         style="
           display: flex;
@@ -710,6 +684,7 @@
       const totalPriceDisplay = document.getElementById("totalPrice");
       const stepTitle = document.getElementById("stepTitle");
       const summaryBlock = document.getElementById("summaryBlock");
+      const confirmationBlock = document.getElementById("confirmationBlock");
       const doneBlock = document.getElementById("doneBlock");
       const nextBtn = document.getElementById("nextBtn");
       const backBtn = document.getElementById("backBtn");
@@ -792,9 +767,9 @@
         const statusDiv = document.createElement("div");
         statusDiv.className = "upload-status";
         statusDiv.innerHTML = `
-  <span class="spinner" style="width:14px;height:14px;border-width:2px;"></span>
-  <span class="percent">0%</span>
-`;
+           <span class="spinner" style="width:14px;height:14px;border-width:2px;"></span>
+           <span class="percent">0%</span>
+           `;
 
         const removeIcon = document.createElement("span");
         removeIcon.className = "remove-icon";
@@ -848,28 +823,28 @@
               resultDiv.className = "result";
               resultDiv.id = `result-${file.name}`;
               resultDiv.innerHTML = `
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <span style="
-      display: flex;
-      max-width: 250px;
-      overflow: hidden;
-    ">
-      <span style="
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex-shrink: 1;
-        min-width: 0;
-      ">
-        ${file.name.slice(0, file.name.lastIndexOf("."))}
-      </span>
-      <span style="flex-shrink: 0; margin-left: 2px;">
-        ${file.name.slice(file.name.lastIndexOf("."))}
-      </span>
-    </span>
-    <span style="font-weight: bold;">${price} Kč</span>
-  </div>
-`;
+                 <div style="display: flex; justify-content: space-between; align-items: center;">
+                 <span style="
+                 display: flex;
+                 max-width: 250px;
+                 overflow: hidden;
+                 ">
+                 <span style="
+                 overflow: hidden;
+                 text-overflow: ellipsis;
+                 white-space: nowrap;
+                 flex-shrink: 1;
+                 min-width: 0;
+                 ">
+          ${file.name.slice(0, file.name.lastIndexOf("."))}
+              </span>
+              <span style="flex-shrink: 0; margin-left: 2px;">
+          ${file.name.slice(file.name.lastIndexOf("."))}
+                </span>
+                </span>
+                <span style="font-weight: bold;">${price} Kč</span>
+                </div>
+                `;
               resultsContainer.appendChild(resultDiv);
 
               // ✅ Remove spinner/status after delay
@@ -879,13 +854,13 @@
 
                 const nameDiv = document.createElement("div");
                 nameDiv.innerHTML = `
-    <div style="font-size: 13px; text-align: center;">
-      <div>${shortName}</div>
-      <div style="font-size: 11px; opacity: 0.6;">${file.name.slice(
-        file.name.lastIndexOf(".")
-      )}</div>
-    </div>
-  `;
+      <div style="font-size: 13px; text-align: center;">
+        <div>${shortName}</div>
+        <div style="font-size: 11px; opacity: 0.6;">${file.name.slice(
+          file.name.lastIndexOf(".")
+        )}</div>
+      </div>
+    `;
                 previewBox.insertBefore(nameDiv, removeIcon);
 
                 previewBox.classList.add("success");
@@ -910,8 +885,8 @@
 
       function renderSummary() {
         summaryBlock.innerHTML = `
-    <div id="totalPrice" class="total"></div>
-  `;
+      <div id="totalPrice" class="total"></div>
+    `;
         const totalDiv = document.getElementById("totalPrice");
 
         uploadedModels.forEach((model, i) => {
@@ -927,24 +902,24 @@
           const lineTotal = (unit * qty).toFixed(2);
 
           row.innerHTML = `
-      <span class="name" title="${model.filename}">
-        <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
-      </span>
-      <span class="cell unit">${unit} Kč</span>
-      <span class="cell times">×</span>
-      <span class="cell qty">
-        <input
-          type="number"
-          min="1"
-          max="9999"
-          value="${qty}"
-          oninput="updateQuantity(${i}, this)"
-        />
-      </span>
-      <span class="cell equals">=</span>
-      <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
-      <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
-    `;
+        <span class="name" title="${model.filename}">
+          <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
+        </span>
+        <span class="cell unit">${unit} Kč</span>
+        <span class="cell times">×</span>
+        <span class="cell qty">
+          <input
+            type="number"
+            min="1"
+            max="9999"
+            value="${qty}"
+            oninput="updateQuantity(${i}, this)"
+          />
+        </span>
+        <span class="cell equals">=</span>
+        <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
+        <button class="cell remove" onclick="removeModel(${i})">🗑️</button>
+      `;
           summaryBlock.insertBefore(row, totalDiv);
         });
 
@@ -953,8 +928,8 @@
 
       function renderConfirmation() {
         confirmationBlock.innerHTML = `
-    <div id="confirmTotal" class="total"></div>
-  `;
+      <div id="confirmTotal" class="total"></div>
+    `;
         const totalDiv = document.getElementById("confirmTotal");
 
         uploadedModels.forEach((model, i) => {
@@ -970,18 +945,18 @@
           const lineTotal = (unit * qty).toFixed(2);
 
           row.innerHTML = `
-      <span class="cell name" title="${model.filename}">
-        <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
-      </span>
-      <span class="cell unit">${unit} Kč</span>
-      <span class="cell times">×</span>
-      <span class="cell qty">
-        <input type="text" value="${qty}" disabled />
-      </span>
-      <span class="cell equals">=</span>
-      <span class="cell line-total">${lineTotal} Kč</span>
-      <span class="cell confirm-icon" title="Hotovo">✅</span>
-    `;
+        <span class="cell name" title="${model.filename}">
+          <span class="base-name">${baseName}</span><span class="extension">${extension}</span>
+        </span>
+        <span class="cell unit">${unit} Kč</span>
+        <span class="cell times">×</span>
+        <span class="cell qty">
+          <input type="text" value="${qty}" disabled />
+        </span>
+        <span class="cell equals">=</span>
+        <span class="cell line-total">${lineTotal} Kč</span>
+        <span class="cell confirm-icon" title="Hotovo">✅</span>
+      `;
           confirmationBlock.insertBefore(row, totalDiv);
         });
 
@@ -1002,6 +977,7 @@
           }
 
           // Step 1 → Step 2: widen card
+          document.getElementById("notesField").style.display = "none";
           document.getElementById("dropdownBlock").style.display = "none";
           container.classList.add("wide");
           document.getElementById("resultsContainer").style.display = "none";
@@ -1030,10 +1006,11 @@
       function goBack() {
         if (currentStep === 2) {
           // Step 2 → Step 1: shrink card
+          document.getElementById("notesField").style.display = "block";
+          document.getElementById("dropdownBlock").style.display = "grid";
           container.classList.remove("wide");
           summaryBlock.classList.remove("active");
           uploadBlock.classList.add("active");
-          document.getElementById("dropdownBlock").style.display = "grid";
           document.getElementById("resultsContainer").style.display = "block";
           stepTitle.textContent = "Nahrajte 3D modely";
           backBtn.style.display = "none";
