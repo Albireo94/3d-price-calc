@@ -413,7 +413,7 @@
       .notes-field {
         width: 100%;
         max-width: 400px;
-        margin: 8px auto 0 auto;
+        margin: -18px auto 0 auto;
         text-align: left;
         transition: display 0.2s;
       }
@@ -431,6 +431,16 @@
         margin-top: 2px;
         margin-bottom: 8px;
         box-sizing: border-box;
+      }
+      .contact-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px 24px;
+        margin-bottom: 16px;
+        max-width: 450px;
+        justify-content: center; /* centers grid items horizontally in grid */
+        margin-left: auto; /* centers the grid as a block */
+        margin-right: auto;
       }
     </style>
   </head>
@@ -792,8 +802,8 @@
 
       function renderSummary() {
         summaryBlock.innerHTML = `
-          <div id="totalPrice" class="total"></div>
-        `;
+    <div id="totalPrice" class="total"></div>
+  `;
         const totalDiv = document.getElementById("totalPrice");
 
         uploadedModels.forEach((model, i) => {
@@ -809,29 +819,73 @@
           const lineTotal = (unit * qty).toFixed(2);
 
           row.innerHTML = `
-            <span class="name" title="${model.filename}">
-              <span class="base-name">${baseName}</span>
-              <span class="extension">${extension}</span>
-            </span>
-            <span class="cell unit">${unit} Kč</span>
-            <span class="cell times">×</span>
-            <span class="cell qty">
-              <input
-                type="number"
-                min="1"
-                max="9999"
-                value="${qty}"
-                oninput="updateQuantity(${i}, this)"
-              />
-            </span>
-            <span class="cell equals">=</span>
-            <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
-            <button class="cell remove" onclick="removeModel(${i})" title="Vyhodit">🗑️</button>
-          `;
+      <span class="name" title="${model.filename}">
+        <span class="base-name">${baseName}</span>
+        <span class="extension">${extension}</span>
+      </span>
+      <span class="cell unit">${unit} Kč</span>
+      <span class="cell times">×</span>
+      <span class="cell qty">
+        <input
+          type="number"
+          min="1"
+          max="9999"
+          value="${qty}"
+          oninput="updateQuantity(${i}, this)"
+        />
+      </span>
+      <span class="cell equals">=</span>
+      <span class="cell line-total" id="lineTotal${i}">${lineTotal} Kč</span>
+      <button class="cell remove" onclick="removeModel(${i})" title="Vyhodit">🗑️</button>
+    `;
           summaryBlock.insertBefore(row, totalDiv);
         });
 
         updateTotal();
+
+        // Insert contact fields *after* the total price
+        const contactFieldsHTML = `
+    <div style="width: 100%; max-width: 450px; margin: 32px auto 16px auto;">
+      <h3 style="font-family: 'Montserrat', Arial, sans-serif; font-size: 20px; font-weight: 700; text-align: left; letter-spacing: 0.8px; margin-left: 32px;">
+        Fakturační údaje
+      </h3>
+      <div class="contact-fields" style="display: grid; grid-template-columns: 180px 180px; gap: 16px 24px; margin-top: 5px; margin-bottom: 16px; max-width:460px; justify-content: center;">
+        <div style="display: flex; flex-direction: column;">
+          <label for="contactName" style="font-size:14px; margin-bottom: 4px; text-align: left;">Vaše celé jméno *</label>
+          <input type="text" id="contactName" name="contactName" style="padding:7px 8px; border:1.5px solid #262626; border-radius:6px; font-size:15px;">
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <label for="contactCompany" style="font-size:14px; margin-bottom: 4px; text-align: left;">Společnost</label>
+          <input type="text" id="contactCompany" name="contactCompany" style="padding:7px 8px; border:1.5px solid #262626; border-radius:6px; font-size:15px;">
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <label for="contactEmail" style="font-size:14px; margin-bottom: 4px; text-align: left;">Váš e-mail *</label>
+          <input type="email" id="contactEmail" name="contactEmail" required style="padding:7px 8px; border:1.5px solid #262626; border-radius:6px; font-size:15px;">
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <label for="contactPhone" style="font-size:14px; margi  n-bottom: 4px; text-align: left;">Váš telefon *</label>
+          <input type="tel" id="contactPhone" name="contactPhone" style="padding:7px 8px; border:1.5px solid #262626; border-radius:6px; font-size:15px;">
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <label for="contactStreet" style="font-size:14px; margin-bottom: 4px; text-align: left;">Ulice *</label>
+          <input type="email" id="contactEmail" name="contactEmail" required style="padding:7px 8px; border:1.5px solid #262626; border-radius:6px; font-size:15px;">
+        </div>
+        <div style="display: flex; flex-direction: column; max-width: 120px; min-width: 70px;">
+          <label for="cpopisne" style="font-size:14px; margin-bottom: 4px; text-align: left;">ČP *</label>
+          <input type="text" id="cpopisne" name="cpopisne" style="padding:7px 8px; border:1.5px solid #262626; border-radius:6px; font-size:15px; max-width: 60px; min-width: 70px;">
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <label for="contactCity" style="font-size:14px; margin-bottom: 4px; text-align: left;">Město *</label>
+          <input type="email" id="contactEmail" name="contactEmail" required style="padding:7px 8px; border:1.5px solid #262626; border-radius:6px; font-size:15px;">
+        </div>
+        <div style="display: flex; flex-direction: column; max-width: 120px; min-width: 70px;">
+          <label for="psc" style="font-size:14px; margin-bottom: 4px; text-align: left;">PSČ *</label>
+          <input type="text" id="psc" name="psc" style="padding:7px 8px; border:1.5px solid #262626; border-radius:6px; font-size:15px; max-width: 60px; min-width: 70px;">
+        </div>
+      </div>
+    </div>
+  `;
+        totalDiv.insertAdjacentHTML("afterend", contactFieldsHTML);
       }
 
       function renderConfirmation() {
@@ -891,7 +945,7 @@
           document.getElementById("resultsContainer").style.display = "none";
           uploadBlock.classList.remove("active");
           summaryBlock.classList.add("active");
-          stepTitle.textContent = "Zadejte množství a osobní informace";
+          stepTitle.textContent = "Zadejte množství a kontaktní údaje";
           backBtn.style.display = "inline-block";
           currentStep++;
         } else if (currentStep === 2) {
@@ -927,7 +981,7 @@
           // Step 3 → Step 2
           confirmationBlock.classList.remove("active");
           summaryBlock.classList.add("active");
-          stepTitle.textContent = "Zadejte množství";
+          stepTitle.textContent = "Zadejte množství a kontaktní údaje";
           currentStep--;
         }
       }
